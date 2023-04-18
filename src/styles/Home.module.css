@@ -16,9 +16,9 @@
   font-size: calc(10px + 2vmin);
 }
 
-.link {
+/* .link {
   color: rgb(112, 76, 182);
-}
+} */
 
 @media (prefers-reduced-motion: no-preference) {
   .logo {
