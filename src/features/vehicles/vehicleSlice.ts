@@ -9,6 +9,7 @@ export interface Vehicle {
   modelYear: string;
   vehicleClass: string;
   manufacturer: string;
+  fuelType: string;
   passengers: string;
   traction: string;
   createdAt: Date;

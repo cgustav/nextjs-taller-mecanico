@@ -20,7 +20,20 @@ export interface CreateVehicleFormInputProps {
   maxLength?: number;
 }
 
-function CreateFormTextInput(props: CreateVehicleFormInputProps) {
+export interface FormSelectorElement {
+  name: string;
+  value: string;
+}
+
+export interface CreateFormSelectorProps {
+  id: string;
+  label: string;
+  inputName: string;
+  options: FormSelectorElement[];
+  value: string;
+}
+
+function CreateFormInput(props: CreateVehicleFormInputProps) {
   const {
     id,
     label,
@@ -79,7 +92,129 @@ function CreateFormTextInput(props: CreateVehicleFormInputProps) {
   );
 }
 
+function CreateFormSelector(props: CreateFormSelectorProps) {
+  const { id, label, inputName, options } = props;
+  return (
+    <div className="flex flex-wrap -mx-3 mb-6">
+      <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+        <label
+          htmlFor={id}
+          className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+        >
+          {label}
+        </label>
+        <div className="relative">
+          <select
+            className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            id={id}
+            name={inputName}
+          >
+            {/* <option>Seleccionar</option>
+            <option>Option 2</option>
+            <option>Option 3</option> */}
+
+            {options.map((option) => {
+              return (
+                <option key={option.value} value={option.value}>
+                  {option.name}
+                </option>
+              );
+            })}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+            <svg
+              className="fill-current h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CreateVehicle() {
+  const fuelTypes = [
+    {
+      name: "Gasolina",
+      value: "gasolina",
+    },
+    {
+      name: "Diesel",
+      value: "diesel",
+    },
+    {
+      name: "Híbrido",
+      value: "hibrido",
+    },
+    {
+      name: "Eléctrico",
+      value: "electrico",
+    },
+    {
+      name: "Otro",
+      value: "otro",
+    },
+  ];
+
+  const tractionTypes = [
+    {
+      name: "Delantera",
+      value: "delantera",
+    },
+    {
+      name: "Trasera",
+      value: "trasera",
+    },
+    {
+      name: "4x4",
+      value: "4x4",
+    },
+    {
+      name: "6x6",
+      value: "6x6",
+    },
+    {
+      name: "Otro",
+      value: "Otro",
+    },
+  ];
+
+  const vehicleClasses = [
+    {
+      name: "Automóvil",
+      value: "automovil",
+    },
+    {
+      name: "Camioneta",
+      value: "camioneta",
+    },
+    {
+      name: "Camión",
+      value: "camion",
+    },
+    {
+      name: "Motocicleta",
+      value: "motocicleta",
+    },
+    {
+      name: "Cuatrimoto",
+      value: "Cuatrimoto",
+    },
+  ];
+
+  const modelYearRange = 70;
+  const modelYearStart = new Date().getFullYear() + 1 - modelYearRange;
+  const modelYears = Array.from(
+    { length: modelYearRange },
+    (_, idx) => `${modelYearStart + idx}`
+  )
+    .sort()
+    .reverse();
+
   const [vehicle, setVehicleState] = useState({
     id: "",
     licensePlate: "",
@@ -91,6 +226,7 @@ function CreateVehicle() {
     passengers: "",
     traction: "",
     notes: "",
+    fuelType: "",
   });
 
   useEffect(() => {
@@ -137,7 +273,7 @@ function CreateVehicle() {
     <div>
       <h2>Crear Vehículo</h2>
       <form className="w-full max-w-lg">
-        <CreateFormTextInput
+        <CreateFormInput
           id="cvf_licence_plate"
           label="Patente"
           inputName="licensePlate"
@@ -150,7 +286,7 @@ function CreateVehicle() {
         {/* <label htmlFor="cvf_manufacturer">Fabricante</label>
         <input type="text" id="cvf_manufacturer" name="manufacturer" /> */}
 
-        <CreateFormTextInput
+        <CreateFormInput
           id="cvf_manufacturer"
           label="Fabricante"
           inputName="manufacturer"
@@ -163,7 +299,7 @@ function CreateVehicle() {
         {/* <label htmlFor="cvf_model">Modelo</label>
         <input type="text" id="cvf_model" name="model" /> */}
 
-        <CreateFormTextInput
+        <CreateFormInput
           id="cvf_model"
           label="Modelo"
           inputName="model"
@@ -176,7 +312,7 @@ function CreateVehicle() {
         {/* <label htmlFor="cvf_color">Color</label>
         <input type="text" id="cvf_color" name="color" /> */}
 
-        <CreateFormTextInput
+        <CreateFormInput
           id="cvf_color"
           label="Color"
           inputName="color"
@@ -189,7 +325,7 @@ function CreateVehicle() {
         {/* <label htmlFor="cvf_model_year">Año Fabricación</label>
         <input type="text" id="cvf_model_year" name="modelYear" /> */}
 
-        <CreateFormTextInput
+        {/* <CreateFormInput
           id="cvf_model_year"
           label="Año Fabricación"
           inputName="modelYear"
@@ -197,30 +333,48 @@ function CreateVehicle() {
           maxLength={4}
           onChange={handleChange}
           value={vehicle.modelYear}
+        /> */}
+
+        <CreateFormSelector
+          id="cvf_model_year"
+          label="Año Fabricación"
+          inputName="modelYear"
+          // onChange={handleChange}
+          options={modelYears.map((year) => ({ value: year, name: year }))}
+          value={vehicle.traction}
         />
 
         {/* <label htmlFor="cvf_vehicle_class">Tipo de vehículo</label>
         <input type="text" id="cvf_vehicle_class" name="vehicleClass" /> */}
 
-        <CreateFormTextInput
+        {/* <CreateFormInput
           id="cvf_vehicle_class"
-          label="Año Fabricación"
+          label="Tipo de vehículo"
           inputName="vehicleClass"
           placeholder="Ej: 2019"
           maxLength={4}
           onChange={handleChange}
+          value={vehicle.vehicleClass}
+        /> */}
+
+        <CreateFormSelector
+          id="cvf_vehicle_class"
+          label="Tipo de vehículo"
+          inputName="vehicleClass"
+          // onChange={handleChange}
+          options={vehicleClasses}
           value={vehicle.vehicleClass}
         />
 
         {/* <label htmlFor="cvf_passengers">Cantidad Pasajeros</label>
         <input type="text" id="cvf_passengers" name="passengers" /> */}
 
-        <CreateFormTextInput
+        <CreateFormInput
           id="cvf_passengers"
           label="Cantidad Pasajeros"
           inputName="passengers"
           placeholder="Ej: 4"
-          maxLength={4}
+          maxLength={2}
           onChange={handleChange}
           value={vehicle.passengers}
         />
@@ -228,7 +382,7 @@ function CreateVehicle() {
         {/* <label htmlFor="cvf_traction">Tracción</label>
         <input type="text" id="cvf_traction" name="traction" /> */}
 
-        <CreateFormTextInput
+        {/* <CreateFormInput
           id="cvf_traction"
           label="Tracción"
           inputName="traction"
@@ -236,9 +390,18 @@ function CreateVehicle() {
           maxLength={4}
           onChange={handleChange}
           value={vehicle.traction}
+        /> */}
+
+        <CreateFormSelector
+          id="cvf_traction"
+          label="Tracción"
+          inputName="fuelType"
+          // onChange={handleChange}
+          options={tractionTypes}
+          value={vehicle.traction}
         />
 
-        <div className="inline-block relative w-64 -mx-3 mb-6">
+        {/* <div className="inline-block relative w-64 -mx-3 mb-6">
           <select className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-3 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
             <option>
               Really long option that will likely overlap the chevron
@@ -255,12 +418,21 @@ function CreateVehicle() {
               <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
             </svg>
           </div>
-        </div>
+        </div> */}
+
+        <CreateFormSelector
+          id="cvf_fuel_type"
+          label="Tipo de Combustible"
+          inputName="fuelType"
+          // onChange={handleChange}
+          options={fuelTypes}
+          value={vehicle.fuelType}
+        />
 
         {/* <label htmlFor="cvf_notes">Notas</label>
         <input type="text" id="cvf_notes" name="notes" /> */}
 
-        <CreateFormTextInput
+        <CreateFormInput
           id="cvf_notes"
           label="Notas"
           inputName="notes"
