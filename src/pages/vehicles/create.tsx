@@ -442,7 +442,12 @@ function CreateVehicle() {
           value={vehicle.notes}
         />
 
-        <button type="submit">Create Vehicle</button>
+        <button
+          type="submit"
+          className="bg-zinc-600 px-2 py-2 rounded-md text-sm self-center"
+        >
+          Crear Vehículo
+        </button>
       </form>
     </div>
   );

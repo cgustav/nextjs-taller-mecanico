@@ -22,7 +22,7 @@ function Vehicles() {
           href="/vehicles/create"
           className="bg-sky-600 text-white px-2 py-1 rounded-sm text-sm shadow-sm"
         >
-          Crear Tarea
+          Crear Vehículo
         </Link>
       </header>
 
