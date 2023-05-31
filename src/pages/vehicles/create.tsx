@@ -1,8 +1,15 @@
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { MODULE_STATUS } from "../../store";
-import { Vehicle, selectVehicles } from "../../features/vehicles/vehicleSlice";
+import vehicleSlice, {
+  Vehicle,
+  addVehicle,
+  selectVehicles,
+} from "../../features/vehicles/vehicleSlice";
+import FormHeader from "../../components/shared/form-header";
 import type { NextPage } from "next";
 import InputMask from "react-input-mask";
+import { v4 as uuid } from "uuid";
+import { useDispatch, useSelector } from "react-redux";
 
 import { useState, useEffect } from "react";
 
@@ -53,7 +60,7 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
   //   const { name, value } = e.target;
 
   return (
-    <div className="flex flex-wrap -mx-3 mb-6">
+    <div className="flex flex-wrap -mx-3 mb-6 items-center justify-center">
       <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
         <label
           htmlFor={id}
@@ -95,7 +102,7 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
 function CreateFormSelector(props: CreateFormSelectorProps) {
   const { id, label, inputName, options } = props;
   return (
-    <div className="flex flex-wrap -mx-3 mb-6">
+    <div className="flex flex-wrap -mx-3 mb-6 items-center justify-center">
       <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
         <label
           htmlFor={id}
@@ -137,6 +144,10 @@ function CreateFormSelector(props: CreateFormSelectorProps) {
 }
 
 function CreateVehicle() {
+  //  vehicleSlice
+  const dispatch = useDispatch();
+  // const status = useAppSelector(selectVehicles);
+
   const fuelTypes = [
     {
       name: "Gasolina",
@@ -227,6 +238,7 @@ function CreateVehicle() {
     traction: "",
     notes: "",
     fuelType: "",
+    createdAt: "",
   });
 
   useEffect(() => {
@@ -269,16 +281,48 @@ function CreateVehicle() {
     });
   };
 
+  const handleTaskCreation = () => {
+    // const {
+    //   licensePlate,
+    //   color,
+    //   model,
+    //   manufacturer,
+    //   modelYear,
+    //   vehicleClass,
+    //   passengers,
+    //   traction,
+    //   notes,
+    //   fuelType,
+    // } = vehicle;
+
+    vehicle.id = uuid();
+    vehicle.createdAt = new Date().toISOString();
+
+    console.log("About to dispatch vehicle: ", vehicle);
+    dispatch(addVehicle(vehicle));
+  };
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    console.log("handleSubmit vehicle: ", vehicle);
+    handleTaskCreation();
+  };
+
   return (
-    <div>
-      <h2>Crear Vehículo</h2>
-      <form className="w-full max-w-lg">
+    <div className="mb-6">
+      {/* <h2 className="text-teal-900 font-black">Crear Vehículo</h2> */}
+      <FormHeader
+        id="header-registro-vehiculo"
+        text="Registro de Vehículo"
+        includeRoute={true}
+      ></FormHeader>
+      <form className="">
         <CreateFormInput
           id="cvf_licence_plate"
           label="Patente"
           inputName="licensePlate"
-          placeholder="Ej: JJ-XS-19"
-          maxLength={8}
+          placeholder="Ej: JJXS19"
+          maxLength={6}
           onChange={handleChange}
           value={vehicle.licensePlate}
         />
@@ -442,12 +486,15 @@ function CreateVehicle() {
           value={vehicle.notes}
         />
 
-        <button
-          type="submit"
-          className="bg-zinc-600 px-2 py-2 rounded-md text-sm self-center"
-        >
-          Crear Vehículo
-        </button>
+        <div className="flex justify-center">
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="w-full md:w-1/2 bg-zinc-700 px-2 py-4 rounded-md text-sm self-center text-white hover:bg-zinc-900 transition duration-500 ease-in-out font-black"
+          >
+            Crear Vehículo
+          </button>
+        </div>
       </form>
     </div>
   );

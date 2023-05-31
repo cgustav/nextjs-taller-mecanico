@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { AppState } from "../../store";
 
 export interface Vehicle {
-  id: number;
+  id: string;
   licensePlate: string;
   color: string;
   model: string;
@@ -12,7 +12,7 @@ export interface Vehicle {
   fuelType: string;
   passengers: string;
   traction: string;
-  createdAt: Date;
+  createdAt: string;
   notes: string;
 }
 
@@ -34,7 +34,7 @@ const vehiclesSlice = createSlice({
     addVehicle: (state, action: PayloadAction<Vehicle>) => {
       state.vehicles.push(action.payload);
     },
-    removeVehicle: (state, action: PayloadAction<number>) => {
+    removeVehicle: (state, action: PayloadAction<string>) => {
       state.vehicles = state.vehicles.filter(
         (vehicle) => vehicle.id !== action.payload
       );
@@ -61,7 +61,7 @@ const vehiclesSlice = createSlice({
 export const { addVehicle, removeVehicle, updateVehicle } =
   vehiclesSlice.actions;
 
-export const selectVehicles = (state: any) => state.vehicles;
-export const selectStatus = (state: any) => state.status;
+export const selectVehicles = (state: AppState) => state.vehicles.vehicles;
+export const selectStatus = (state: AppState) => state.vehicles.status;
 
 export default vehiclesSlice.reducer;
