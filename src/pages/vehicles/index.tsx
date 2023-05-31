@@ -70,6 +70,7 @@ function Vehicles() {
               width="120"
               height="120"
             />
+
             {/* <h2 className="text-lg font-bold mb-2 text-zinc-700 ">
               {vehicle.licensePlate}
             </h2> */}
