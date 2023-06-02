@@ -61,7 +61,7 @@ function Vehicles() {
   console.log("Vehicles Type: ", typeof vehicles);
 
   return (
-    <div>
+    <div className="px-6">
       {showDeletionVehicleAlert != false && (
         <ConfirmationAlert
           message="Confirma que desea eliminar el vehículo? Esta acción no se puede deshacer."
@@ -74,22 +74,21 @@ function Vehicles() {
 
       <div>
         <header>
-          <h2>Vehículos</h2>
-          <Link
-            href="/vehicles/create"
-            className="bg-sky-600 text-white px-2 py-1 rounded-sm text-sm shadow-sm"
-          >
-            Crear Vehículo
-          </Link>
+          <FormHeader
+            id="header-vehiculos"
+            text="Vehículos registrados"
+            includeRoute={false}
+          ></FormHeader>
         </header>
 
-        <FormHeader
-          id="header-vehiculos"
-          text="Vehículos registrados"
-          includeRoute={false}
-        ></FormHeader>
+        <Link
+          href="/vehicles/create"
+          className="bg-sky-600 text-white px-2 py-1 rounded-sm text-sm shadow-sm"
+        >
+          Crear Vehículo
+        </Link>
 
-        <div className="py-2"></div>
+        <div className="py-2 mt-6"></div>
 
         {vehicles.length === 0 && (
           <div className="flex flex-col items-center justify-center">

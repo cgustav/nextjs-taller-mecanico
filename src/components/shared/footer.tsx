@@ -5,18 +5,12 @@ const Footer = () => {
   return (
     <div className={styles.container}>
       <h1 className={styles.text}>
-        Built with{" "}
-        <Link href="https://nextjs.org/">
-          <span className={styles.stack}>Nextjs</span>
-        </Link>{" "}
-        and{" "}
-        <Link href="https://supabase.com/">
-          <span className={styles.stack}>Supabase</span>
+        Hecho con mucho <span className={styles.stack}>💪</span> y{" "}
+        <span className={styles.stack}>🔥</span> por{" "}
+        <Link href="https://github.com/cgustav">
+          <span className={styles.stack}>CGustav</span>
         </Link>
       </h1>
-      <Link href="">
-        <p className={styles.repo}>Github Repo</p>
-      </Link>
     </div>
   );
 };
