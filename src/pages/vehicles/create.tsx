@@ -1,19 +1,18 @@
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { MODULE_STATUS } from "../../store";
-import vehicleSlice, {
-  Vehicle,
+import {
   addVehicle,
-  selectVehicles,
+  updateVehicle,
 } from "../../features/vehicles/vehicleSlice";
 import FormHeader from "../../components/shared/form-header";
-import type { NextPage } from "next";
 import InputMask from "react-input-mask";
 import { v4 as uuid } from "uuid";
 import { useDispatch, useSelector } from "react-redux";
-
 import { useState, useEffect } from "react";
-
-// Render the form to create a new vehicle
+import { useRouter } from "next/router";
+import type { AppState } from "../../store";
+import GreenAlert from "../../components/shared/green-alert";
+import ErrorLabel from "../../components/shared/error-label";
 
 export interface CreateVehicleFormInputProps {
   id: string;
@@ -25,6 +24,7 @@ export interface CreateVehicleFormInputProps {
   onChange?: any;
   value?: any;
   maxLength?: number;
+  error?: string;
 }
 
 export interface FormSelectorElement {
@@ -38,6 +38,8 @@ export interface CreateFormSelectorProps {
   inputName: string;
   options: FormSelectorElement[];
   value: string;
+  onChange?: any;
+  error?: string;
 }
 
 function CreateFormInput(props: CreateVehicleFormInputProps) {
@@ -51,6 +53,7 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
     onChange,
     value,
     maxLength,
+    error,
   } = props;
   const standardInputClassName =
     "appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white";
@@ -91,16 +94,16 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
             maxLength={maxLength}
           />
         )}
-        {/* <p className="text-red-500 text-xs italic">
-              Please fill out this field.
-            </p> */}
+
+        {error && <ErrorLabel message={error} />}
       </div>
     </div>
   );
 }
 
 function CreateFormSelector(props: CreateFormSelectorProps) {
-  const { id, label, inputName, options } = props;
+  const { id, label, inputName, options, onChange, value, error } = props;
+
   return (
     <div className="flex flex-wrap -mx-3 mb-6 items-center justify-center">
       <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
@@ -110,16 +113,18 @@ function CreateFormSelector(props: CreateFormSelectorProps) {
         >
           {label}
         </label>
-        <div className="relative">
+        {/* TODO: Change to relative if it breaks */}
+        <div className="">
           <select
             className="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             id={id}
             name={inputName}
+            onChange={onChange}
+            value={value}
           >
-            {/* <option>Seleccionar</option>
-            <option>Option 2</option>
-            <option>Option 3</option> */}
-
+            <option value="" disabled>
+              Seleccione opción
+            </option>
             {options.map((option) => {
               return (
                 <option key={option.value} value={option.value}>
@@ -138,13 +143,60 @@ function CreateFormSelector(props: CreateFormSelectorProps) {
             </svg>
           </div>
         </div>
+
+        {error && <ErrorLabel message={error} />}
       </div>
     </div>
   );
 }
 
+const findVehicleById = (state: AppState, id: string) => {
+  // Implementa la lógica para buscar el vehículo por su ID en el estado
+  return state.vehicles.find((vehicle: any) => vehicle.id === id) || null;
+};
+
 function CreateVehicle() {
-  //  vehicleSlice
+  const router = useRouter();
+  const baseVehicles = useSelector((state: any) => state.vehicles);
+
+  /**
+   * Estado del vehículo
+   * (Se inicializa con un objeto vacío para que no se rompa el código al
+   * intentar acceder a las propiedades del vehículo en el formulario
+   * antes de que se cargue el vehículo desde el estado
+   * y se actualice el estado del componente
+   * con los datos del vehículo)
+   */
+  const [vehicle, setVehicleState] = useState({
+    id: "",
+    licensePlate: "",
+    color: "",
+    model: "",
+    manufacturer: "",
+    modelYear: "",
+    vehicleClass: "",
+    passengers: "",
+    traction: "",
+    notes: "",
+    fuelType: "",
+    createdAt: "",
+  });
+
+  /**
+   * Hook para actualizar el estado para mostrar el mensaje de alerta
+   * cuando se crea o edita un vehículo.
+   */
+  const [showAlert, setShowAlert] = useState(false);
+
+  // Estado para almacenar los errores de validación
+  const [errors, setErrors] = useState<any>({});
+
+  const { vehicleId } = router.query;
+
+  console.log("Query  vehicleId: ", vehicleId);
+  const isEditing = vehicleId !== null && vehicleId !== undefined;
+  console.log("Is editing: ", isEditing);
+
   const dispatch = useDispatch();
   // const status = useAppSelector(selectVehicles);
 
@@ -217,6 +269,33 @@ function CreateVehicle() {
     },
   ];
 
+  const passengersOptions = [
+    {
+      name: "1",
+      value: "1",
+    },
+    {
+      name: "2",
+      value: "2",
+    },
+    {
+      name: "3",
+      value: "3",
+    },
+    {
+      name: "4",
+      value: "4",
+    },
+    {
+      name: "5",
+      value: "5",
+    },
+    {
+      name: "6 o más",
+      value: "6omas",
+    },
+  ];
+
   const modelYearRange = 70;
   const modelYearStart = new Date().getFullYear() + 1 - modelYearRange;
   const modelYears = Array.from(
@@ -226,36 +305,123 @@ function CreateVehicle() {
     .sort()
     .reverse();
 
-  const [vehicle, setVehicleState] = useState({
-    id: "",
-    licensePlate: "",
-    color: "",
-    model: "",
-    manufacturer: "",
-    modelYear: "",
-    vehicleClass: "",
-    passengers: "",
-    traction: "",
-    notes: "",
-    fuelType: "",
-    createdAt: "",
-  });
-
+  //NOTE: Will only be executed at the time of initial
+  //rendering and it will not be executed on component
+  //re-rendering.
   useEffect(() => {
     console.log("CreateVehicle useEffect");
-  }, []);
 
-  // const handleLicensePlateChange = (e: any) => {
-  //   console.log("handleChange e.target.name: ", e.target.name);
-  //   const { name, value } = e.target;
+    if (vehicleId?.length && isEditing) {
+      const foundVehicle = findVehicleById(baseVehicles, vehicleId as string);
+      console.log("Found vehicle: ", foundVehicle);
 
-  //   //Uppercase #cvf_licence_plate input content on change
-  //   const licensePlateInput = document.getElementById("cvf_licence_plate");
-  //   if (licensePlateInput) {
-  //     licensePlateInput.value = value.toUpperCase();
-  //   }
+      if (foundVehicle) {
+        setVehicleState(foundVehicle);
+        console.log("Setting vehicle state: ", foundVehicle);
+      }
+    }
 
-  // };
+    //TEST ONLY
+
+    // setErrors({
+    //   licensePlate: "La placa ya existe",
+    // });
+  }, [vehicleId, baseVehicles]);
+
+  console.log("Current vehicle state: ", vehicle);
+
+  const validateFormData = (data: any) => {
+    // Objeto para almacenar los errores de validación
+    let validationErrors: any = {};
+
+    //Comprobar placa patente chilena a través de regex
+    //https://www.abe.cl/contenidos/automotriz/2016/08/29/Editorial/0001.html
+    const regex = /^[A-Z]{2}[A-Z0-9]{2}[0-9]{2}$/;
+    if (!regex.test(data.licensePlate)) {
+      validationErrors.licensePlate =
+        "La placa no cumple con el formato de una placa chilena";
+    } else {
+      console.log("baseVehicle: ", baseVehicles);
+      const foundVehicle = baseVehicles.vehicles.find(
+        (vehicle: any) => vehicle.licensePlate === data.licensePlate
+      );
+      if (foundVehicle) {
+        validationErrors.licensePlate = "La placa ya existe";
+      }
+    }
+
+    if (!data.manufacturer) {
+      validationErrors.manufacturer = "El fabricante es requerido";
+    } else if (data.manufacturer.length < 3) {
+      validationErrors.manufacturer =
+        "El fabricante debe tener al menos 3 caracteres";
+    }
+
+    if (!data.model) {
+      validationErrors.model = "El modelo es requerido";
+    } else if (data.model.length < 3) {
+      validationErrors.model = "El modelo debe tener al menos 3 caracteres";
+    }
+
+    if (!data.color) {
+      validationErrors.color = "El color es requerido";
+    } else if (data.color.length < 3) {
+      validationErrors.color = "El color debe tener al menos 3 caracteres";
+    }
+
+    if (!data.modelYear) {
+      validationErrors.modelYear = "El año es requerido";
+    }
+
+    if (!data.vehicleClass) {
+      validationErrors.vehicleClass = "La clase es requerida";
+    }
+
+    if (!data.fuelType) {
+      validationErrors.fuelType = "El tipo de combustible es requerido";
+    }
+
+    if (!data.traction) {
+      validationErrors.traction = "El tipo de tracción es requerido";
+    }
+
+    if (!data.passengers) {
+      validationErrors.passengers = "El número de pasajeros es requerido";
+    }
+
+    return validationErrors;
+  };
+
+  const handleOptionChange = (e: any) => {
+    console.log("Event: ", e);
+    const targetName = e.target.name;
+    const selectedValue = e.target.value;
+
+    console.log("handleOptionChange name: ", targetName);
+    console.log("handleOptionChange value: ", selectedValue);
+
+    const validationErrors = validateFormData({
+      ...vehicle,
+      [targetName]: selectedValue,
+    });
+
+    if (validationErrors[targetName]) {
+      setErrors({
+        ...errors,
+        [targetName]: validationErrors[targetName],
+      });
+    } else {
+      setErrors({
+        ...errors,
+        [targetName]: "",
+      });
+    }
+
+    setVehicleState((prevFormData) => ({
+      ...prevFormData,
+      [targetName]: selectedValue,
+    }));
+  };
 
   const handleChange = (e: any) => {
     console.log("handleChange e.target.name: ", e.target.name);
@@ -263,17 +429,24 @@ function CreateVehicle() {
 
     if (name === "licensePlate") {
       value = value.toUpperCase();
-
-      //   console.log("value sub5 ", value[5]);
-
-      //   if (value.trim().length == 5 && !value[5]) {
-      //     value += "-";
-      //   } else if (value.trim().length == 2 && !value[2]) {
-      //     value += "-";
-      //   }
     }
 
-    console.log("handleChange licensePlate value: ", value);
+    const validationErrors = validateFormData({
+      ...vehicle,
+      [name]: value,
+    });
+
+    if (validationErrors[name]) {
+      setErrors({
+        ...errors,
+        [name]: validationErrors[name],
+      });
+    } else {
+      setErrors({
+        ...errors,
+        [name]: "",
+      });
+    }
 
     setVehicleState({
       ...vehicle,
@@ -282,94 +455,116 @@ function CreateVehicle() {
   };
 
   const handleTaskCreation = () => {
-    // const {
-    //   licensePlate,
-    //   color,
-    //   model,
-    //   manufacturer,
-    //   modelYear,
-    //   vehicleClass,
-    //   passengers,
-    //   traction,
-    //   notes,
-    //   fuelType,
-    // } = vehicle;
-
     vehicle.id = uuid();
     vehicle.createdAt = new Date().toISOString();
 
-    console.log("About to dispatch vehicle: ", vehicle);
+    console.log("[handleTaskCreation]: ", vehicle);
     dispatch(addVehicle(vehicle));
+  };
+
+  const handleTaskUpdate = () => {
+    console.log("[handleTaskUpdate]: ", vehicle);
+    dispatch(updateVehicle(vehicle));
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
     console.log("handleSubmit vehicle: ", vehicle);
-    handleTaskCreation();
+
+    // Validar los datos del formulario antes de enviar
+    const validationErrors = validateFormData(vehicle);
+
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
+
+      console.log(
+        "Prevent submit because of validation errors: ",
+        validationErrors
+      );
+      return;
+    }
+
+    if (isEditing) {
+      handleTaskUpdate();
+      setShowAlert(true);
+    } else {
+      handleTaskCreation();
+      setShowAlert(true);
+    }
+  };
+
+  const onCloseAlert = () => {
+    setShowAlert(false);
+    //Navegar hacia el home
+    router.push("/");
   };
 
   return (
-    <div className="mb-6">
-      {/* <h2 className="text-teal-900 font-black">Crear Vehículo</h2> */}
-      <FormHeader
-        id="header-registro-vehiculo"
-        text="Registro de Vehículo"
-        includeRoute={true}
-      ></FormHeader>
-      <form className="">
-        <CreateFormInput
-          id="cvf_licence_plate"
-          label="Patente"
-          inputName="licensePlate"
-          placeholder="Ej: JJXS19"
-          maxLength={6}
-          onChange={handleChange}
-          value={vehicle.licensePlate}
+    <div>
+      {showAlert != false && (
+        <GreenAlert
+          message={
+            isEditing
+              ? "Vehículo actualizado exitosamente"
+              : "Vehículo creado exitosamente"
+          }
+          onClose={onCloseAlert}
         />
+      )}
 
-        {/* <label htmlFor="cvf_manufacturer">Fabricante</label>
-        <input type="text" id="cvf_manufacturer" name="manufacturer" /> */}
+      <div className="mb-6">
+        {/* <h2 className="text-teal-900 font-black">Crear Vehículo</h2> */}
+        <FormHeader
+          id="header-registro-vehiculo"
+          text="Registro de Vehículo"
+          includeRoute={true}
+        ></FormHeader>
+        <form className="">
+          <CreateFormInput
+            id="cvf_licence_plate"
+            label="Patente"
+            inputName="licensePlate"
+            placeholder="Ej: JJXS19"
+            maxLength={6}
+            onChange={handleChange}
+            value={vehicle.licensePlate}
+            error={errors.licensePlate}
+          />
 
-        <CreateFormInput
-          id="cvf_manufacturer"
-          label="Fabricante"
-          inputName="manufacturer"
-          placeholder="Ej: Ford"
-          maxLength={80}
-          onChange={handleChange}
-          value={vehicle.manufacturer}
-        />
+          <CreateFormInput
+            id="cvf_manufacturer"
+            label="Fabricante"
+            inputName="manufacturer"
+            placeholder="Ej: Ford"
+            maxLength={80}
+            onChange={handleChange}
+            value={vehicle.manufacturer}
+            error={errors.manufacturer}
+          />
 
-        {/* <label htmlFor="cvf_model">Modelo</label>
-        <input type="text" id="cvf_model" name="model" /> */}
+          <CreateFormInput
+            id="cvf_model"
+            label="Modelo"
+            inputName="model"
+            placeholder="Ej: Focus"
+            maxLength={120}
+            onChange={handleChange}
+            value={vehicle.model}
+            error={errors.model}
+          />
 
-        <CreateFormInput
-          id="cvf_model"
-          label="Modelo"
-          inputName="model"
-          placeholder="Ej: Focus"
-          maxLength={120}
-          onChange={handleChange}
-          value={vehicle.model}
-        />
+          <CreateFormInput
+            id="cvf_color"
+            label="Color"
+            inputName="color"
+            placeholder="Ej: Rojo"
+            maxLength={50}
+            onChange={handleChange}
+            value={vehicle.color}
+            error={errors.color}
+          />
 
-        {/* <label htmlFor="cvf_color">Color</label>
-        <input type="text" id="cvf_color" name="color" /> */}
-
-        <CreateFormInput
-          id="cvf_color"
-          label="Color"
-          inputName="color"
-          placeholder="Ej: Rojo"
-          maxLength={50}
-          onChange={handleChange}
-          value={vehicle.color}
-        />
-
-        {/* <label htmlFor="cvf_model_year">Año Fabricación</label>
-        <input type="text" id="cvf_model_year" name="modelYear" /> */}
-
-        {/* <CreateFormInput
+          {/* <CreateFormInput
           id="cvf_model_year"
           label="Año Fabricación"
           inputName="modelYear"
@@ -379,19 +574,18 @@ function CreateVehicle() {
           value={vehicle.modelYear}
         /> */}
 
-        <CreateFormSelector
-          id="cvf_model_year"
-          label="Año Fabricación"
-          inputName="modelYear"
-          // onChange={handleChange}
-          options={modelYears.map((year) => ({ value: year, name: year }))}
-          value={vehicle.traction}
-        />
+          <CreateFormSelector
+            id="cvf_model_year"
+            label="Año Fabricación"
+            inputName="modelYear"
+            // onChange={handleChange}
+            options={modelYears.map((year) => ({ value: year, name: year }))}
+            value={vehicle.modelYear}
+            error={errors.modelYear}
+            onChange={handleOptionChange}
+          />
 
-        {/* <label htmlFor="cvf_vehicle_class">Tipo de vehículo</label>
-        <input type="text" id="cvf_vehicle_class" name="vehicleClass" /> */}
-
-        {/* <CreateFormInput
+          {/* <CreateFormInput
           id="cvf_vehicle_class"
           label="Tipo de vehículo"
           inputName="vehicleClass"
@@ -401,32 +595,40 @@ function CreateVehicle() {
           value={vehicle.vehicleClass}
         /> */}
 
-        <CreateFormSelector
-          id="cvf_vehicle_class"
-          label="Tipo de vehículo"
-          inputName="vehicleClass"
-          // onChange={handleChange}
-          options={vehicleClasses}
-          value={vehicle.vehicleClass}
-        />
+          <CreateFormSelector
+            id="cvf_vehicle_class"
+            label="Tipo de vehículo"
+            inputName="vehicleClass"
+            options={vehicleClasses}
+            value={vehicle.vehicleClass}
+            error={errors.vehicleClass}
+            onChange={handleOptionChange}
+          />
 
-        {/* <label htmlFor="cvf_passengers">Cantidad Pasajeros</label>
-        <input type="text" id="cvf_passengers" name="passengers" /> */}
+          {/* <CreateFormInput
+            id="cvf_passengers"
+            label="Cantidad Pasajeros"
+            inputName="passengers"
+            placeholder="Ej: 4"
+            maxLength={2}
+            onChange={handleChange}
+            value={vehicle.passengers}
+          /> */}
 
-        <CreateFormInput
-          id="cvf_passengers"
-          label="Cantidad Pasajeros"
-          inputName="passengers"
-          placeholder="Ej: 4"
-          maxLength={2}
-          onChange={handleChange}
-          value={vehicle.passengers}
-        />
+          <CreateFormSelector
+            id="cvf_passengers"
+            label="Cantidad Pasajeros"
+            inputName="passengers"
+            options={passengersOptions.map((pass) => ({
+              value: pass.value,
+              name: pass.name,
+            }))}
+            value={vehicle.passengers}
+            onChange={handleOptionChange}
+            error={errors.passengers}
+          />
 
-        {/* <label htmlFor="cvf_traction">Tracción</label>
-        <input type="text" id="cvf_traction" name="traction" /> */}
-
-        {/* <CreateFormInput
+          {/* <CreateFormInput
           id="cvf_traction"
           label="Tracción"
           inputName="traction"
@@ -436,66 +638,48 @@ function CreateVehicle() {
           value={vehicle.traction}
         /> */}
 
-        <CreateFormSelector
-          id="cvf_traction"
-          label="Tracción"
-          inputName="fuelType"
-          // onChange={handleChange}
-          options={tractionTypes}
-          value={vehicle.traction}
-        />
+          <CreateFormSelector
+            id="cvf_traction"
+            label="Tracción"
+            inputName="traction"
+            onChange={handleOptionChange}
+            options={tractionTypes}
+            value={vehicle.traction}
+            error={errors.traction}
+          />
 
-        {/* <div className="inline-block relative w-64 -mx-3 mb-6">
-          <select className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-3 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-            <option>
-              Really long option that will likely overlap the chevron
-            </option>
-            <option>Option 2</option>
-            <option>Option 3</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-            <svg
-              className="fill-current h-4 w-4"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
+          <CreateFormSelector
+            id="cvf_fuel_type"
+            label="Tipo de Combustible"
+            inputName="fuelType"
+            onChange={handleOptionChange}
+            options={fuelTypes}
+            value={vehicle.fuelType}
+            error={errors.fuelType}
+          />
+
+          <CreateFormInput
+            id="cvf_notes"
+            label="Notas"
+            inputName="notes"
+            placeholder="Ej: Vidrios polarizados, etc."
+            maxLength={500}
+            onChange={handleChange}
+            value={vehicle.notes}
+            error={errors.notes}
+          />
+
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              className="w-full md:w-1/2 bg-zinc-700 px-2 py-4 rounded-md text-sm self-center text-white hover:bg-zinc-900 transition duration-500 ease-in-out font-black"
             >
-              <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-            </svg>
+              {isEditing ? "Editar" : "Crear"} Vehículo
+            </button>
           </div>
-        </div> */}
-
-        <CreateFormSelector
-          id="cvf_fuel_type"
-          label="Tipo de Combustible"
-          inputName="fuelType"
-          // onChange={handleChange}
-          options={fuelTypes}
-          value={vehicle.fuelType}
-        />
-
-        {/* <label htmlFor="cvf_notes">Notas</label>
-        <input type="text" id="cvf_notes" name="notes" /> */}
-
-        <CreateFormInput
-          id="cvf_notes"
-          label="Notas"
-          inputName="notes"
-          placeholder="Ej: Vidrios polarizados, etc."
-          maxLength={500}
-          onChange={handleChange}
-          value={vehicle.notes}
-        />
-
-        <div className="flex justify-center">
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="w-full md:w-1/2 bg-zinc-700 px-2 py-4 rounded-md text-sm self-center text-white hover:bg-zinc-900 transition duration-500 ease-in-out font-black"
-          >
-            Crear Vehículo
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

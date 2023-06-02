@@ -63,5 +63,8 @@ export const { addVehicle, removeVehicle, updateVehicle } =
 
 export const selectVehicles = (state: AppState) => state.vehicles.vehicles;
 export const selectStatus = (state: AppState) => state.vehicles.status;
+// export const selectVehicleById = (state: AppState) => state.vehicles.status;
+export const getVehicleById = (state: AppState, vehicleId: string) =>
+  state.vehicles.vehicles.find((vh: Vehicle) => vh.id === vehicleId) || null;
 
 export default vehiclesSlice.reducer;
