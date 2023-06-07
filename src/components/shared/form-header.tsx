@@ -28,7 +28,10 @@ function FormHeader(props: FormHeaderProps) {
   };
 
   return (
-    <div className="flex md:px-20 px-6 text-3xl" style={style}>
+    <div
+      className="flex flex-row items-center align-start md:px-6 px-6 text-xl"
+      style={style}
+    >
       {includeRoute && (
         <div className="text-zinc-700" style={iconStyle}>
           <FontAwesomeIcon

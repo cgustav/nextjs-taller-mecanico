@@ -64,7 +64,7 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
 
   return (
     <div className="flex flex-wrap -mx-3 mb-6 items-center justify-center">
-      <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+      <div className="w-full md:w-4/5 px-3 mb-6 md:mb-0">
         <label
           htmlFor={id}
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -106,7 +106,7 @@ function CreateFormSelector(props: CreateFormSelectorProps) {
 
   return (
     <div className="flex flex-wrap -mx-3 mb-6 items-center justify-center">
-      <div className="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+      <div className="w-full md:w-4/5 px-3 mb-6 md:mb-0">
         <label
           htmlFor={id}
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
@@ -133,7 +133,7 @@ function CreateFormSelector(props: CreateFormSelectorProps) {
               );
             })}
           </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          {/* <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
             <svg
               className="fill-current h-4 w-4"
               xmlns="http://www.w3.org/2000/svg"
@@ -141,7 +141,7 @@ function CreateFormSelector(props: CreateFormSelectorProps) {
             >
               <path d="M10 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
             </svg>
-          </div>
+          </div> */}
         </div>
 
         {error && <ErrorLabel message={error} />}
@@ -500,7 +500,7 @@ function CreateVehicle() {
   };
 
   return (
-    <div>
+    <div className="px-6">
       {showAlert != false && (
         <GreenAlert
           message={
@@ -512,59 +512,64 @@ function CreateVehicle() {
         />
       )}
 
-      <div className="mb-6">
-        {/* <h2 className="text-teal-900 font-black">Crear Vehículo</h2> */}
+      <header>
         <FormHeader
           id="header-registro-vehiculo"
           text="Registro de Vehículo"
           includeRoute={true}
         ></FormHeader>
-        <form className="">
-          <CreateFormInput
-            id="cvf_licence_plate"
-            label="Patente"
-            inputName="licensePlate"
-            placeholder="Ej: JJXS19"
-            maxLength={6}
-            onChange={handleChange}
-            value={vehicle.licensePlate}
-            error={errors.licensePlate}
-          />
+      </header>
 
-          <CreateFormInput
-            id="cvf_manufacturer"
-            label="Fabricante"
-            inputName="manufacturer"
-            placeholder="Ej: Ford"
-            maxLength={80}
-            onChange={handleChange}
-            value={vehicle.manufacturer}
-            error={errors.manufacturer}
-          />
+      <div className="w-full mb-6">
+        {/* <h2 className="text-teal-900 font-black">Crear Vehículo</h2> */}
 
-          <CreateFormInput
-            id="cvf_model"
-            label="Modelo"
-            inputName="model"
-            placeholder="Ej: Focus"
-            maxLength={120}
-            onChange={handleChange}
-            value={vehicle.model}
-            error={errors.model}
-          />
+        <div>
+          <form className="min-w-full">
+            <CreateFormInput
+              id="cvf_licence_plate"
+              label="Patente"
+              inputName="licensePlate"
+              placeholder="Ej: JJXS19"
+              maxLength={6}
+              onChange={handleChange}
+              value={vehicle.licensePlate}
+              error={errors.licensePlate}
+            />
 
-          <CreateFormInput
-            id="cvf_color"
-            label="Color"
-            inputName="color"
-            placeholder="Ej: Rojo"
-            maxLength={50}
-            onChange={handleChange}
-            value={vehicle.color}
-            error={errors.color}
-          />
+            <CreateFormInput
+              id="cvf_manufacturer"
+              label="Fabricante"
+              inputName="manufacturer"
+              placeholder="Ej: Ford"
+              maxLength={80}
+              onChange={handleChange}
+              value={vehicle.manufacturer}
+              error={errors.manufacturer}
+            />
 
-          {/* <CreateFormInput
+            <CreateFormInput
+              id="cvf_model"
+              label="Modelo"
+              inputName="model"
+              placeholder="Ej: Focus"
+              maxLength={120}
+              onChange={handleChange}
+              value={vehicle.model}
+              error={errors.model}
+            />
+
+            <CreateFormInput
+              id="cvf_color"
+              label="Color"
+              inputName="color"
+              placeholder="Ej: Rojo"
+              maxLength={50}
+              onChange={handleChange}
+              value={vehicle.color}
+              error={errors.color}
+            />
+
+            {/* <CreateFormInput
           id="cvf_model_year"
           label="Año Fabricación"
           inputName="modelYear"
@@ -574,18 +579,18 @@ function CreateVehicle() {
           value={vehicle.modelYear}
         /> */}
 
-          <CreateFormSelector
-            id="cvf_model_year"
-            label="Año Fabricación"
-            inputName="modelYear"
-            // onChange={handleChange}
-            options={modelYears.map((year) => ({ value: year, name: year }))}
-            value={vehicle.modelYear}
-            error={errors.modelYear}
-            onChange={handleOptionChange}
-          />
+            <CreateFormSelector
+              id="cvf_model_year"
+              label="Año Fabricación"
+              inputName="modelYear"
+              // onChange={handleChange}
+              options={modelYears.map((year) => ({ value: year, name: year }))}
+              value={vehicle.modelYear}
+              error={errors.modelYear}
+              onChange={handleOptionChange}
+            />
 
-          {/* <CreateFormInput
+            {/* <CreateFormInput
           id="cvf_vehicle_class"
           label="Tipo de vehículo"
           inputName="vehicleClass"
@@ -595,17 +600,17 @@ function CreateVehicle() {
           value={vehicle.vehicleClass}
         /> */}
 
-          <CreateFormSelector
-            id="cvf_vehicle_class"
-            label="Tipo de vehículo"
-            inputName="vehicleClass"
-            options={vehicleClasses}
-            value={vehicle.vehicleClass}
-            error={errors.vehicleClass}
-            onChange={handleOptionChange}
-          />
+            <CreateFormSelector
+              id="cvf_vehicle_class"
+              label="Tipo de vehículo"
+              inputName="vehicleClass"
+              options={vehicleClasses}
+              value={vehicle.vehicleClass}
+              error={errors.vehicleClass}
+              onChange={handleOptionChange}
+            />
 
-          {/* <CreateFormInput
+            {/* <CreateFormInput
             id="cvf_passengers"
             label="Cantidad Pasajeros"
             inputName="passengers"
@@ -615,20 +620,20 @@ function CreateVehicle() {
             value={vehicle.passengers}
           /> */}
 
-          <CreateFormSelector
-            id="cvf_passengers"
-            label="Cantidad Pasajeros"
-            inputName="passengers"
-            options={passengersOptions.map((pass) => ({
-              value: pass.value,
-              name: pass.name,
-            }))}
-            value={vehicle.passengers}
-            onChange={handleOptionChange}
-            error={errors.passengers}
-          />
+            <CreateFormSelector
+              id="cvf_passengers"
+              label="Cantidad Pasajeros"
+              inputName="passengers"
+              options={passengersOptions.map((pass) => ({
+                value: pass.value,
+                name: pass.name,
+              }))}
+              value={vehicle.passengers}
+              onChange={handleOptionChange}
+              error={errors.passengers}
+            />
 
-          {/* <CreateFormInput
+            {/* <CreateFormInput
           id="cvf_traction"
           label="Tracción"
           inputName="traction"
@@ -638,47 +643,48 @@ function CreateVehicle() {
           value={vehicle.traction}
         /> */}
 
-          <CreateFormSelector
-            id="cvf_traction"
-            label="Tracción"
-            inputName="traction"
-            onChange={handleOptionChange}
-            options={tractionTypes}
-            value={vehicle.traction}
-            error={errors.traction}
-          />
+            <CreateFormSelector
+              id="cvf_traction"
+              label="Tracción"
+              inputName="traction"
+              onChange={handleOptionChange}
+              options={tractionTypes}
+              value={vehicle.traction}
+              error={errors.traction}
+            />
 
-          <CreateFormSelector
-            id="cvf_fuel_type"
-            label="Tipo de Combustible"
-            inputName="fuelType"
-            onChange={handleOptionChange}
-            options={fuelTypes}
-            value={vehicle.fuelType}
-            error={errors.fuelType}
-          />
+            <CreateFormSelector
+              id="cvf_fuel_type"
+              label="Tipo de Combustible"
+              inputName="fuelType"
+              onChange={handleOptionChange}
+              options={fuelTypes}
+              value={vehicle.fuelType}
+              error={errors.fuelType}
+            />
 
-          <CreateFormInput
-            id="cvf_notes"
-            label="Notas"
-            inputName="notes"
-            placeholder="Ej: Vidrios polarizados, etc."
-            maxLength={500}
-            onChange={handleChange}
-            value={vehicle.notes}
-            error={errors.notes}
-          />
+            <CreateFormInput
+              id="cvf_notes"
+              label="Notas"
+              inputName="notes"
+              placeholder="Ej: Vidrios polarizados, etc."
+              maxLength={500}
+              onChange={handleChange}
+              value={vehicle.notes}
+              error={errors.notes}
+            />
 
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="w-full md:w-1/2 bg-zinc-700 px-2 py-4 rounded-md text-sm self-center text-white hover:bg-zinc-900 transition duration-500 ease-in-out font-black"
-            >
-              {isEditing ? "Editar" : "Crear"} Vehículo
-            </button>
-          </div>
-        </form>
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                className="w-full md:w-4/5 bg-zinc-700 px-2 py-4 rounded-md text-sm self-center text-white hover:bg-zinc-900 transition duration-500 ease-in-out font-black"
+              >
+                {isEditing ? "Editar" : "Crear"} Vehículo
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

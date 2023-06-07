@@ -67,4 +67,6 @@ export const selectStatus = (state: AppState) => state.vehicles.status;
 export const getVehicleById = (state: AppState, vehicleId: string) =>
   state.vehicles.vehicles.find((vh: Vehicle) => vh.id === vehicleId) || null;
 
+export const moduleName = "vehicles";
+
 export default vehiclesSlice.reducer;

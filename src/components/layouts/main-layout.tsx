@@ -16,7 +16,10 @@ export default function MainLayout({ children }: any) {
           <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
         </Head>
         <NavBar></NavBar>
+
+        {/* <div className="flex items-center justify-center py-4 md:py-4"> */}
         <main>{children}</main>
+        {/* </div> */}
         <Footer></Footer>
       </div>
     </>

@@ -9,13 +9,10 @@ import MainLayout from "../components/layouts/main-layout";
 
 const IndexPage: NextPage = () => {
   return (
-    <div className="flex items-center justify-center text-white py-4 md:py-0">
-      {/* onClick={() => router.back()} */}
+    // <div className="flex items-center justify-center text-white py-4 md:py-0">
 
-      <div className="text-white">
-        <Vehicles></Vehicles>
-      </div>
-    </div>
+    <Vehicles></Vehicles>
+    // </div>
   );
 };
 

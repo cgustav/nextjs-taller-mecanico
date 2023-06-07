@@ -7,7 +7,12 @@ import {
 } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
 // import counterReducer from "./features/counter/counterSlice";
-import vehiclesReducer from "./features/vehicles/vehicleSlice";
+import vehiclesReducer, {
+  moduleName as vehiclesRef,
+} from "./features/vehicles/vehicleSlice";
+import ordersReducer, {
+  moduleName as ordersRef,
+} from "./features/orders/orderSlice";
 import storage from "redux-persist/lib/storage";
 import { createWrapper, Context, HYDRATE } from "next-redux-wrapper";
 
@@ -18,8 +23,8 @@ export enum MODULE_STATUS {
 }
 
 const rootReducer = combineReducers({
-  // counter: counterReducer,
   vehicles: vehiclesReducer,
+  orders: ordersReducer,
 });
 
 const makeConfiguredStore = () =>
@@ -42,7 +47,7 @@ export const makeStore = () => {
     // we need it only on client side
     const persistConfig = {
       key: "nextjs",
-      whitelist: ["auth", "vehicles"], // make sure it does not clash with server keys
+      whitelist: ["auth", vehiclesRef, ordersRef], // make sure it does not clash with server keys
       storage,
     };
     const persistedReducer = persistReducer(persistConfig, rootReducer);
