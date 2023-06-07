@@ -5,12 +5,15 @@ import {
   WorkOrderStatus,
   getOrderById,
   selectOrders,
+  updateOrder,
 } from "../../features/orders/orderSlice";
 import FormHeader from "../../components/shared/form-header";
 import ResponsiveButton from "../../components/shared/responsive-button";
 import CreateBillingModal from "../../components/billings/createBillingModal/modal";
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import { useRouter } from "next/router";
+import ConfirmationAlert from "../../components/shared/confirm-alert";
+import { regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 
 export interface OrderDetailsInterface {
   order: any;
@@ -40,43 +43,12 @@ const OrderDetails = () => {
 
   const fetched_orders = useAppSelector(selectOrders) as WorkOrder[];
 
-  // Fetch order from API from store
+  // Control de estado para actualización
+  // de la orden de trabajo.
   const [order, setOrder] = useState<Partial<WorkOrder>>({});
 
-  const { orderId } = router.query;
-
-  console.log("orderId", orderId);
-
-  useEffect(() => {
-    console.log("useEffect");
-    if (orderId && orderId.length && typeof orderId === "string") {
-      console.log("validating orderId");
-      const foundOrder = getOrderById(fetched_orders, orderId);
-
-      console.log(
-        "Found order",
-        foundOrder,
-        "fetched_orders",
-        fetched_orders
-        // "orderId",
-        // orderId,
-        // "typeof orderId",
-        // typeof orderId,
-        // "orderId.length",
-        // orderId.length,
-        // 'orderId.length && typeof orderId === "string"',
-        // orderId.length && typeof orderId === "string"
-      );
-      if (!foundOrder) {
-        router.push("/404");
-      } else {
-        setOrder(foundOrder);
-      }
-    } else {
-      router.push("/orders");
-    }
-  }, [orderId, fetched_orders]);
-
+  // Control de estado para mostrar/ocultar
+  // la ventana emergente de creación de factura.
   const [showVentanaEmergente, setShowVentanaEmergente] = useState(false);
 
   const openVentanaEmergente = () => {
@@ -88,17 +60,127 @@ const OrderDetails = () => {
     setShowVentanaEmergente(false);
   };
 
+  // Control de estado para mostrar/ocultar
+  // la ventana emergente de actualización de orden
+  // (confirmación)
+  const [showOrderUpdateModal, setShowOrderUpdateModal] = useState(false);
+
+  const openOrderUpdateModal = () => {
+    setShowOrderUpdateModal(true);
+  };
+
+  const closeOrderUpdateModal = () => {
+    setShowOrderUpdateModal(false);
+  };
+
+  // Lectura del parámetro de ruta orderId
+  // para obtener la orden de trabajo
+  // correspondiente desde el estado global.
+  const { orderId } = router.query;
+
+  /**
+   * useEffect para:
+   * - Validar que orderId sea un string no vacío
+   * - Validar que orderId sea un id de orden de trabajo válido
+   * - Actualizar el estado de la orden de trabajo
+   *   con la orden de trabajo encontrada.
+   *
+   */
+
+  useEffect(() => {
+    console.log("useEffect");
+    if (orderId && orderId.length && typeof orderId === "string") {
+      console.log("validating orderId");
+      const foundOrder = getOrderById(fetched_orders, orderId);
+
+      console.log("Found order", foundOrder, "fetched_orders", fetched_orders);
+      if (!foundOrder) {
+        router.push("/404");
+      } else {
+        setOrder(foundOrder);
+      }
+    } else {
+      router.push("/orders");
+    }
+  }, [orderId, fetched_orders]);
+
+  /**
+   * Inicia proceso de creación de factura.
+   */
   const onCreateBilling = () => {
     console.log("onCreateBilling");
     openVentanaEmergente();
   };
 
+  /**
+   * Actualiza la orden de trabajo a
+   * PENDIENTE (por pagar).
+   *
+   */
   const onCompleteOrder = () => {
     console.log("onCompleteOrder");
+    const completedOrder = {
+      ...order,
+      status: WorkOrderStatus.PENDING,
+    } as WorkOrder;
+    setOrder(completedOrder);
+    dispatch(updateOrder(completedOrder));
   };
 
+  /**
+   * Actualiza la orden de trabajo a
+   * CANCELADO (no se podrá emitir factura).
+   *
+   */
   const onCancelOrder = () => {
     console.log("onCancelOrder");
+    const cancelledOrder = {
+      ...order,
+      status: WorkOrderStatus.CANCELLED,
+    } as WorkOrder;
+    setOrder(cancelledOrder);
+    dispatch(updateOrder(cancelledOrder));
+  };
+
+  const [updateModalConfig, setUpdateModalConfig] = useState({
+    message: "",
+    confirmButtonText: "Confirmar",
+    cancelButtonText: "Cancelar",
+    onConfirm: () => {},
+    onClose: () => {},
+  });
+
+  const onUpdateBillingStatus = (statusTo: string) => {
+    console.log("onUpdateBillingStatus");
+
+    if (statusTo === WorkOrderStatus.PENDING) {
+      setUpdateModalConfig({
+        ...updateModalConfig,
+        message: "¿Desea confirmar operación? No podrá deshacer cambios.",
+        onConfirm: () => {
+          onCompleteOrder();
+          closeOrderUpdateModal();
+        },
+        onClose: () => closeOrderUpdateModal(),
+      });
+    }
+
+    if (statusTo === WorkOrderStatus.CANCELLED) {
+      setUpdateModalConfig({
+        ...updateModalConfig,
+        message:
+          "¿Desea confirmar operación? No podrá emitir factura para esta orden.",
+        onConfirm: () => {
+          onCancelOrder();
+          closeOrderUpdateModal();
+        },
+        onClose: () => {
+          closeOrderUpdateModal();
+        },
+      });
+    }
+
+    openOrderUpdateModal();
   };
 
   const labelMappping = {
@@ -188,6 +270,17 @@ const OrderDetails = () => {
 
   return (
     <div className="flex items-center justify-center py-4 md:py-2">
+      {showOrderUpdateModal && (
+        <ConfirmationAlert
+          icon={regular("question-circle")}
+          message={updateModalConfig.message}
+          onCancel={() => updateModalConfig.onClose()}
+          onConfirm={() => updateModalConfig.onConfirm()}
+          confirmButtonText={updateModalConfig.confirmButtonText}
+          cancelButtonText={updateModalConfig.cancelButtonText}
+        ></ConfirmationAlert>
+      )}
+
       {showVentanaEmergente && (
         <CreateBillingModal
           onClose={() => closeVentanaEmergente()}
@@ -232,6 +325,7 @@ const OrderDetails = () => {
                 textSm="Completar"
                 text="Completar orden"
                 theme="warning"
+                onClick={() => onUpdateBillingStatus(WorkOrderStatus.PENDING)}
               ></ResponsiveButton>
             )}
 
@@ -241,6 +335,9 @@ const OrderDetails = () => {
                   textSm="Cancelar"
                   text="Cancelar orden"
                   theme="danger"
+                  onClick={() =>
+                    onUpdateBillingStatus(WorkOrderStatus.CANCELLED)
+                  }
                 ></ResponsiveButton>
               )}
 

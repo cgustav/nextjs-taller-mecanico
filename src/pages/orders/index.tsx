@@ -128,7 +128,7 @@ function Orders() {
     <div className="md:px-40 px-6">
       <header>
         <FormHeader
-          id="header-vehiculos"
+          id="header-work-orders"
           text="Órdenes de trabajo"
           includeRoute={false}
         ></FormHeader>

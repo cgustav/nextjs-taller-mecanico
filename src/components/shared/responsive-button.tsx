@@ -26,7 +26,7 @@ function ResponsiveButton({
         }`;
 
       case "warning":
-        return `border border-rose-500 rounded text-yellow-500 ${
+        return `border border-yellow-500 rounded text-yellow-500 ${
           disablethis ? "opacity-50 cursor-not-allowed" : ""
         }`;
 
