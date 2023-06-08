@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 import type { AppState } from "../../store";
 import GreenAlert from "../../components/shared/green-alert";
 import ErrorLabel from "../../components/shared/error-label";
+import { VehicleTools } from "../../features/vehicles/tools";
 
 export interface CreateVehicleFormInputProps {
   id: string;
@@ -25,6 +26,7 @@ export interface CreateVehicleFormInputProps {
   value?: any;
   maxLength?: number;
   error?: string;
+  disabled?: boolean;
 }
 
 export interface FormSelectorElement {
@@ -54,6 +56,7 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
     value,
     maxLength,
     error,
+    disabled,
   } = props;
   const standardInputClassName =
     "appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white";
@@ -80,6 +83,7 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
               name={inputName}
               placeholder={placeholder ?? ""}
               className={standardInputClassName}
+              disabled={disabled}
             />
           </InputMask>
         ) : (
@@ -92,6 +96,7 @@ function CreateFormInput(props: CreateVehicleFormInputProps) {
             onChange={onChange}
             value={value}
             maxLength={maxLength}
+            disabled={disabled}
           />
         )}
 
@@ -158,6 +163,9 @@ const findVehicleById = (state: AppState, id: string) => {
 function CreateVehicle() {
   const router = useRouter();
   const baseVehicles = useSelector((state: any) => state.vehicles);
+  const baseCustomers = useSelector((state: any) => state.customers.customers);
+
+  console.log("Base Customers: ", baseCustomers);
 
   /**
    * Estado del vehículo
@@ -180,6 +188,8 @@ function CreateVehicle() {
     notes: "",
     fuelType: "",
     createdAt: "",
+    ownerId: "",
+    ownerFullName: "",
   });
 
   /**
@@ -320,77 +330,9 @@ function CreateVehicle() {
         console.log("Setting vehicle state: ", foundVehicle);
       }
     }
-
-    //TEST ONLY
-
-    // setErrors({
-    //   licensePlate: "La placa ya existe",
-    // });
   }, [vehicleId, baseVehicles]);
 
   console.log("Current vehicle state: ", vehicle);
-
-  const validateFormData = (data: any) => {
-    // Objeto para almacenar los errores de validación
-    let validationErrors: any = {};
-
-    //Comprobar placa patente chilena a través de regex
-    //https://www.abe.cl/contenidos/automotriz/2016/08/29/Editorial/0001.html
-    const regex = /^[A-Z]{2}[A-Z0-9]{2}[0-9]{2}$/;
-    if (!regex.test(data.licensePlate)) {
-      validationErrors.licensePlate =
-        "La placa no cumple con el formato de una placa chilena";
-    } else {
-      console.log("baseVehicle: ", baseVehicles);
-      const foundVehicle = baseVehicles.vehicles.find(
-        (vehicle: any) => vehicle.licensePlate === data.licensePlate
-      );
-      if (foundVehicle) {
-        validationErrors.licensePlate = "La placa ya existe";
-      }
-    }
-
-    if (!data.manufacturer) {
-      validationErrors.manufacturer = "El fabricante es requerido";
-    } else if (data.manufacturer.length < 3) {
-      validationErrors.manufacturer =
-        "El fabricante debe tener al menos 3 caracteres";
-    }
-
-    if (!data.model) {
-      validationErrors.model = "El modelo es requerido";
-    } else if (data.model.length < 3) {
-      validationErrors.model = "El modelo debe tener al menos 3 caracteres";
-    }
-
-    if (!data.color) {
-      validationErrors.color = "El color es requerido";
-    } else if (data.color.length < 3) {
-      validationErrors.color = "El color debe tener al menos 3 caracteres";
-    }
-
-    if (!data.modelYear) {
-      validationErrors.modelYear = "El año es requerido";
-    }
-
-    if (!data.vehicleClass) {
-      validationErrors.vehicleClass = "La clase es requerida";
-    }
-
-    if (!data.fuelType) {
-      validationErrors.fuelType = "El tipo de combustible es requerido";
-    }
-
-    if (!data.traction) {
-      validationErrors.traction = "El tipo de tracción es requerido";
-    }
-
-    if (!data.passengers) {
-      validationErrors.passengers = "El número de pasajeros es requerido";
-    }
-
-    return validationErrors;
-  };
 
   const handleOptionChange = (e: any) => {
     console.log("Event: ", e);
@@ -400,10 +342,14 @@ function CreateVehicle() {
     console.log("handleOptionChange name: ", targetName);
     console.log("handleOptionChange value: ", selectedValue);
 
-    const validationErrors = validateFormData({
-      ...vehicle,
-      [targetName]: selectedValue,
-    });
+    const validationErrors = VehicleTools.validateVehicleData(
+      {
+        ...vehicle,
+        [targetName]: selectedValue,
+      },
+      baseVehicles,
+      isEditing
+    );
 
     if (validationErrors[targetName]) {
       setErrors({
@@ -431,10 +377,14 @@ function CreateVehicle() {
       value = value.toUpperCase();
     }
 
-    const validationErrors = validateFormData({
-      ...vehicle,
-      [name]: value,
-    });
+    const validationErrors = VehicleTools.validateVehicleData(
+      {
+        ...vehicle,
+        [name]: value,
+      },
+      baseVehicles,
+      isEditing
+    );
 
     if (validationErrors[name]) {
       setErrors({
@@ -457,6 +407,9 @@ function CreateVehicle() {
   const handleTaskCreation = () => {
     vehicle.id = uuid();
     vehicle.createdAt = new Date().toISOString();
+    vehicle.ownerFullName = (baseCustomers as any[]).find(
+      (custom) => custom.id === vehicle.ownerId
+    )?.fullName;
 
     console.log("[handleTaskCreation]: ", vehicle);
     dispatch(addVehicle(vehicle));
@@ -472,7 +425,11 @@ function CreateVehicle() {
     console.log("handleSubmit vehicle: ", vehicle);
 
     // Validar los datos del formulario antes de enviar
-    const validationErrors = validateFormData(vehicle);
+    const validationErrors = VehicleTools.validateVehicleData(
+      vehicle,
+      baseVehicles,
+      isEditing
+    );
 
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors);
@@ -530,6 +487,7 @@ function CreateVehicle() {
               label="Patente"
               inputName="licensePlate"
               placeholder="Ej: JJXS19"
+              disabled={isEditing}
               maxLength={6}
               onChange={handleChange}
               value={vehicle.licensePlate}
@@ -661,6 +619,19 @@ function CreateVehicle() {
               options={fuelTypes}
               value={vehicle.fuelType}
               error={errors.fuelType}
+            />
+
+            <CreateFormSelector
+              id="cvf_vehicle_owner"
+              label="Propietario del Vehículo"
+              inputName="ownerId"
+              options={baseCustomers.map((custom: any) => ({
+                value: custom.id,
+                name: `${custom.fullName} (${custom.rut})`,
+              }))}
+              value={vehicle.ownerId}
+              error={errors.ownerId}
+              onChange={handleOptionChange}
             />
 
             <CreateFormInput

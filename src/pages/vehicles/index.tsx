@@ -146,7 +146,7 @@ function Vehicles() {
                 </div>
                 <div className="flex flex-row items-center text-gray-500 text-md gap-x-1 mb-4">
                   <p>Cliente</p> <div style={separatorStyle} className=""></div>
-                  <p>{"Juan Pérez"}</p>
+                  <p>{vehicle.ownerFullName.slice(0, 10)}</p>
                 </div>
 
                 <div className="flex flex-row items-center text-gray-500 text-sm gap-x-2">
@@ -156,6 +156,13 @@ function Vehicles() {
                 </div>
 
                 <div className="flex justify-end">
+                  {/* <button
+                    className="text-rose-700 hover:text-rose-900 font-bold py-2 px-4 rounded"
+                    onClick={() => handleVehicleDeletion(vehicle)}
+                  >
+                    Ver
+                  </button> */}
+
                   <Link
                     href={{
                       pathname: "/vehicles/create",
@@ -175,46 +182,6 @@ function Vehicles() {
                 </div>
               </div>
             ))}
-
-            {/* <div className="bg-white rounded-lg shadow-lg p-4">
-          <Image
-            className="w-full rounded-lg mb-4"
-            src="/generic-vehicle.jpeg"
-            alt="me"
-            width="120"
-            height="120"
-          />
-          <h2 className="text-lg font-bold mb-2">Título 2</h2>
-          <p className="mb-4">Contenido de la tarjeta 2</p>
-          <div className="flex justify-end">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
-              Botón 1
-            </button>
-            <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-              Botón 2
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-lg p-4">
-          <Image
-            className="w-full rounded-lg mb-4"
-            src="/generic-vehicle.jpeg"
-            alt="me"
-            width="120"
-            height="120"
-          />
-          <h2 className="text-lg font-bold mb-2">Título 3</h2>
-          <p className="mb-4">Contenido de la tarjeta 3</p>
-          <div className="flex justify-end">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
-              Botón 1
-            </button>
-            <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-              Botón 2
-            </button>
-          </div>
-        </div> */}
           </div>
         </div>
         {/* <ul role="list" className="divide-y divide-gray-100"> */}

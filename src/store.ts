@@ -5,11 +5,13 @@ import {
   combineReducers,
   Store,
 } from "@reduxjs/toolkit";
+
 import { persistReducer, persistStore } from "redux-persist";
-// import counterReducer from "./features/counter/counterSlice";
+
 import vehiclesReducer, {
   moduleName as vehiclesRef,
 } from "./features/vehicles/vehicleSlice";
+
 import ordersReducer, {
   moduleName as ordersRef,
 } from "./features/orders/orderSlice";
@@ -18,10 +20,11 @@ import personnelReducer, {
   moduleName as personnelRef,
 } from "./features/personnel/personnelSlice";
 
-// import storage from "redux-persist/lib/storage";
-// import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+import customerReducer, {
+  moduleName as customersRef,
+} from "./features/customers/customerSlice";
 
-import { createWrapper, Context, HYDRATE } from "next-redux-wrapper";
+import { createWrapper } from "next-redux-wrapper";
 
 /**
  * Applying NoopStorage Patch to solve
@@ -58,6 +61,7 @@ const rootReducer = combineReducers({
   vehicles: vehiclesReducer,
   orders: ordersReducer,
   personnel: personnelReducer,
+  customers: customerReducer,
 });
 
 const makeConfiguredStore = () =>
@@ -81,7 +85,7 @@ export const makeStore = () => {
     // we need it only on client side
     const persistConfig = {
       key: "nextjs",
-      whitelist: ["auth", vehiclesRef, ordersRef, personnelRef], // make sure it does not clash with server keys
+      whitelist: ["auth", vehiclesRef, ordersRef, personnelRef, customersRef], // make sure it does not clash with server keys
       storage,
     };
 

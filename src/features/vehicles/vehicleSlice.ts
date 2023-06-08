@@ -13,6 +13,8 @@ export interface Vehicle {
   passengers: string;
   traction: string;
   createdAt: string;
+  ownerId: string;
+  ownerFullName: string;
   notes: string;
 }
 
