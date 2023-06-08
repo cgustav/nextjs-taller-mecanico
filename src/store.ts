@@ -13,6 +13,9 @@ import vehiclesReducer, {
 import ordersReducer, {
   moduleName as ordersRef,
 } from "./features/orders/orderSlice";
+import customerReducer, {
+  moduleName as customersRef,
+} from "./features/customers/customerSlice";
 import storage from "redux-persist/lib/storage";
 import { createWrapper, Context, HYDRATE } from "next-redux-wrapper";
 
@@ -25,6 +28,7 @@ export enum MODULE_STATUS {
 const rootReducer = combineReducers({
   vehicles: vehiclesReducer,
   orders: ordersReducer,
+  customers: customerReducer
 });
 
 const makeConfiguredStore = () =>
@@ -47,7 +51,7 @@ export const makeStore = () => {
     // we need it only on client side
     const persistConfig = {
       key: "nextjs",
-      whitelist: ["auth", vehiclesRef, ordersRef], // make sure it does not clash with server keys
+      whitelist: ["auth", vehiclesRef, ordersRef, customersRef], // make sure it does not clash with server keys
       storage,
     };
     const persistedReducer = persistReducer(persistConfig, rootReducer);
