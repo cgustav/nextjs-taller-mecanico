@@ -16,6 +16,12 @@ import { useRouter } from "next/router";
 import ConfirmationAlert from "../../components/shared/confirm-alert";
 import { regular } from "@fortawesome/fontawesome-svg-core/import.macro";
 import { DateUtils } from "../../utils/date.utils";
+import {
+  Customer,
+  selectCustomers,
+} from "../../features/customers/customerSlice";
+import Link from "next/link";
+import { Billing, selectBillings } from "../../features/billing/billingSlice";
 
 const debugMode = true;
 
@@ -46,6 +52,8 @@ const OrderDetails = () => {
   const dispatch = useAppDispatch();
 
   const fetched_orders = useAppSelector(selectOrders) as WorkOrder[];
+  const fetched_customers = useAppSelector(selectCustomers) as Customer[];
+  const fetched_billings = useAppSelector(selectBillings) as Billing[];
 
   // Control de estado para actualización
   // de la orden de trabajo.
@@ -288,6 +296,16 @@ const OrderDetails = () => {
     }
   };
 
+  const handleOnCompleteOrder = () => {
+    console.log("handleOnCompleteOrder");
+    setOrder({
+      ...order,
+      status: WorkOrderStatus.BILLED,
+    } as WorkOrder);
+    dispatch(updateOrder(order as WorkOrder));
+    router.push("/orders/invoice?orderId=" + order.id);
+  };
+
   return (
     <div className="flex items-center justify-center py-4 md:py-2">
       {showOrderUpdateModal && (
@@ -304,6 +322,13 @@ const OrderDetails = () => {
       {showVentanaEmergente && (
         <CreateBillingModal
           onClose={() => closeVentanaEmergente()}
+          onComplete={() => handleOnCompleteOrder()}
+          workOrder={order as WorkOrder}
+          customer={
+            fetched_customers.find(
+              (customer) => customer.id === order.customerId
+            )!
+          }
         ></CreateBillingModal>
       )}
 
@@ -362,11 +387,18 @@ const OrderDetails = () => {
               )}
 
             {order.status == WorkOrderStatus.BILLED && (
-              <ResponsiveButton
-                textSm="Ver factura"
-                text="Ver factura"
-                theme="success"
-              ></ResponsiveButton>
+              <Link
+                href={`/orders/invoice?billingId=${fetched_billings.find(
+                  (billing) => billing.workOrder.id === order.id
+                )}`}
+                className="px-6 py-4 pb-4 text-blue-500 hover:underline"
+              >
+                <ResponsiveButton
+                  textSm="Ver factura"
+                  text="Ver factura"
+                  theme="success"
+                ></ResponsiveButton>
+              </Link>
             )}
 
             {debugMode && (

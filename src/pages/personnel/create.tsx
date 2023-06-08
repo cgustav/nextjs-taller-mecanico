@@ -167,7 +167,6 @@ function CreatePersonnel() {
     fullName: "",
     email: "",
     birthdate: "",
-    // isPartTime: false,
     specialty: "",
     address: "",
     phone: "",

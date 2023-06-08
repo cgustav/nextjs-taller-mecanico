@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import type { AppState } from "../../store";
 
 export interface Billing {
   id: string;
@@ -43,6 +44,7 @@ export interface Billing {
   //   unitPrice: number;
   //   total: number;
   // }[];
+  //En reemplazo de items
   billing: string;
   netAmount: number;
   fines: number;
@@ -76,5 +78,9 @@ const billingsSlice = createSlice({
     },
   },
 });
+
+export const { emitBilling } = billingsSlice.actions;
+
+export const selectBillings = (state: AppState) => state.billings.billings;
 
 export default billingsSlice.reducer;

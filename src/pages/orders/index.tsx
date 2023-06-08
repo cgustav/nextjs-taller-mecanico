@@ -194,7 +194,6 @@ function Orders() {
               <th className="px-6 py-3 border-b-2 border-gray-200 font-semibold text-left">
                 Costo
               </th>
-
               <th className="px-6 py-3 border-b-2 border-gray-200 font-semibold text-left">
                 Acción
               </th>
