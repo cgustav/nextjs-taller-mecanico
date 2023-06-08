@@ -24,6 +24,10 @@ import customerReducer, {
   moduleName as customersRef,
 } from "./features/customers/customerSlice";
 
+import billingReducer, {
+  moduleName as billingsRef,
+} from "./features/billing/billingSlice";
+
 import { createWrapper } from "next-redux-wrapper";
 
 /**
@@ -62,6 +66,7 @@ const rootReducer = combineReducers({
   orders: ordersReducer,
   personnel: personnelReducer,
   customers: customerReducer,
+  billings: billingReducer,
 });
 
 const makeConfiguredStore = () =>
@@ -85,7 +90,7 @@ export const makeStore = () => {
     // we need it only on client side
     const persistConfig = {
       key: "nextjs",
-      whitelist: ["auth", vehiclesRef, ordersRef, personnelRef, customersRef], // make sure it does not clash with server keys
+      whitelist: ["auth", vehiclesRef, ordersRef, personnelRef, customersRef, billingsRef], // make sure it does not clash with server keys
       storage,
     };
 
