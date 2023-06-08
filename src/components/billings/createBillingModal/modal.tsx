@@ -142,6 +142,7 @@ function CreateBillingModal({
       return;
     }
 
+    console.log("Creating billing...");
     dispatch(emitBilling(billingChilling));
     onComplete();
   };

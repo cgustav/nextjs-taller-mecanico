@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import type { AppState } from "../../store";
 import { selectBillings } from "../../features/billing/billingSlice";
+import { DateUtils } from "../../utils/date.utils";
 
 const findBillingByOrderId = (collection: any[], orderId: string) => {
   return (
@@ -85,7 +86,7 @@ const InvoiceDetail = () => {
         <div className="flex justify-between mb-6">
           <h1 className="text-lg font-bold">Invoice</h1>
           <div className="text-gray-700">
-            <div>Fecha: {billing.issueDate}</div>
+            <div>Fecha: {DateUtils.formatISOString(billing.issueDate)}</div>
             <div>Número Factura: #{billing.billingNumber}</div>
           </div>
         </div>

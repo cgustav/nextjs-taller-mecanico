@@ -298,11 +298,12 @@ const OrderDetails = () => {
 
   const handleOnCompleteOrder = () => {
     console.log("handleOnCompleteOrder");
-    setOrder({
+    const completedOrder = {
       ...order,
       status: WorkOrderStatus.BILLED,
-    } as WorkOrder);
-    dispatch(updateOrder(order as WorkOrder));
+    } as WorkOrder;
+    setOrder(completedOrder);
+    dispatch(updateOrder(completedOrder));
     router.push("/orders/invoice?orderId=" + order.id);
   };
 
@@ -388,10 +389,8 @@ const OrderDetails = () => {
 
             {order.status == WorkOrderStatus.BILLED && (
               <Link
-                href={`/orders/invoice?billingId=${fetched_billings.find(
-                  (billing) => billing.workOrder.id === order.id
-                )}`}
-                className="px-6 py-4 pb-4 text-blue-500 hover:underline"
+                href={`/orders/invoice?orderId=${order.id}`}
+                // className="px-6 py-4 pb-4 text-blue-500 hover:underline"
               >
                 <ResponsiveButton
                   textSm="Ver factura"
