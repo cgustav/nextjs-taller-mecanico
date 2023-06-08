@@ -117,7 +117,7 @@ const InvoiceDetail = () => {
           <tfoot>
             <tr>
               <td className="text-left font-bold text-gray-700">Total</td>
-              <td className="text-right font-bold text-gray-700">$225.00</td>
+              <td className="text-right font-bold text-gray-700">${billing.totalAmount}</td>
             </tr>
           </tfoot>
         </table>
