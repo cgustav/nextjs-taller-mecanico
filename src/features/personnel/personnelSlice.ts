@@ -22,9 +22,9 @@ export interface PersonnelState {
 }
 
 const initialState: PersonnelState = {
-  //   personnel: [],
+  personnel: [],
   //TODO - DEBUG ONLY DEACTIVATE THIS
-  personnel: PersonnelMocks.standardList,
+  //   personnel: PersonnelMocks.standardList,
   status: "idle",
 };
 

@@ -14,7 +14,7 @@ function Orders() {
   console.log("Fetch orders: ", fetched_orders);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedField, setSelectedField] = useState("licensePlate");
+  const [selectedField, setSelectedField] = useState("vehicleLicensePlate");
 
   const itemsPerPage = 10; // Número de elementos por página
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +84,7 @@ function Orders() {
 
   // Filtrar los datos basado en el término de búsqueda y el campo seleccionado
   const filteredData = fetched_orders.filter((item: any) =>
-    item[selectedField].toLowerCase().includes(searchTerm.toLowerCase())
+    (item[selectedField] || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Obtener los elementos correspondientes a la página actual
@@ -142,7 +142,7 @@ function Orders() {
             <Link href={`/orders/create`}>
               <ResponsiveButton
                 textSm="Crear"
-                text="Crear Nuevo"
+                text="Crear Nueva"
                 theme="success"
               ></ResponsiveButton>
             </Link>
@@ -162,9 +162,9 @@ function Orders() {
               value={selectedField}
               onChange={(e) => setSelectedField(e.target.value)}
             >
-              <option value="licensePlate">Patente Vehículo</option>
-              <option value="notes">Notas</option>
-              <option value="responsibleMechanic">Mecánico a Cargo</option>
+              <option value="vehicleLicensePlate">Patente Vehículo</option>
+              <option value="items">Concepto</option>
+              <option value="workerFullName">Mecánico a Cargo</option>
             </select>
           </div>
         </div>
@@ -207,16 +207,16 @@ function Orders() {
                   {item.id.substring(0, 4)}
                 </td>
                 <td className="px-6 py-4 border-b border-gray-200">
-                  {item.licensePlate}
+                  {item.vehicleLicensePlate}
                 </td>
                 <td className="px-6 py-4 border-b border-gray-200">
                   {item.deliveryDate}
                 </td>
                 <td className="px-6 py-4 border-b border-gray-200">
-                  {(item.items[0] as string).substring(0, 20) || ""}
+                  {(item.items as string).substring(0, 20) || ""}
                 </td>
                 <td className="px-6 py-4 border-b border-gray-200">
-                  {item.responsibleMechanic}
+                  {item.workerFullName}
                 </td>
                 <td className={resolveStatusClassName(item.status)}>
                   {item.status}

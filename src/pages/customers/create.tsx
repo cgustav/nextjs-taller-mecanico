@@ -257,7 +257,7 @@ function CreateCustomer() {
     console.log("handleChange e.target.name: ", e.target.name);
     let { name, value } = e.target;
 
-    if (name === "licensePlate") {
+    if (name === "rut") {
       value = value.toUpperCase();
     }
 

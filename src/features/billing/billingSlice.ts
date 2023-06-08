@@ -36,12 +36,14 @@ export interface Billing {
     cost: number;
   };
   // Otros campos relacionados con los items
-  items: {
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    total: number;
-  }[];
+  // TODO - IMPROVE THIS
+  // items: {
+  //   description: string;
+  //   quantity: number;
+  //   unitPrice: number;
+  //   total: number;
+  // }[];
+  billing: string;
   netAmount: number;
   fines: number;
   otherTaxes: number;

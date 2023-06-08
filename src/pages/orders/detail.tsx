@@ -4,6 +4,7 @@ import {
   WorkOrder,
   WorkOrderStatus,
   getOrderById,
+  removeOrder,
   selectOrders,
   updateOrder,
 } from "../../features/orders/orderSlice";
@@ -14,6 +15,9 @@ import { useAppSelector, useAppDispatch } from "../../hooks";
 import { useRouter } from "next/router";
 import ConfirmationAlert from "../../components/shared/confirm-alert";
 import { regular } from "@fortawesome/fontawesome-svg-core/import.macro";
+import { DateUtils } from "../../utils/date.utils";
+
+const debugMode = true;
 
 export interface OrderDetailsInterface {
   order: any;
@@ -95,7 +99,7 @@ const OrderDetails = () => {
 
       console.log("Found order", foundOrder, "fetched_orders", fetched_orders);
       if (!foundOrder) {
-        router.push("/404");
+        router.push("/orders");
       } else {
         setOrder(foundOrder);
       }
@@ -183,17 +187,27 @@ const OrderDetails = () => {
     openOrderUpdateModal();
   };
 
+  const handleDeleteOrder = (orderId: string) => {
+    console.log("handleDeleteOrder");
+    dispatch(removeOrder(orderId));
+    router.push("/orders");
+  };
+
   const labelMappping = {
     id: "ID",
     receiptDate: "Fecha de recepción",
     deliveryDate: "Fecha de entrega",
-    licensePlate: "Patente",
+    vehicleLicensePlate: "Patente",
+    vehicleId: "ID Vehículo",
     items: "Servicios",
-    responsibleMechanic: "Mecánico responsable",
-    responsibleMechanicId: "ID Mecánico",
+    workerFullName: "Mecánico responsable",
+    workerId: "ID Mecánico",
+    customerFullName: "Cliente",
+    customerId: "ID Cliente",
     notes: "Notas",
     status: "Estado",
     cost: "Costo",
+    createdAt: "Fecha ingreso",
   };
 
   // DEPRECATED
@@ -246,6 +260,15 @@ const OrderDetails = () => {
         return (
           <div className="max-w-xs">
             <p className="text-gray-500 text-end">{value}</p>
+          </div>
+        );
+
+      case "createdAt":
+        return (
+          <div className="max-w-xs">
+            <p className="text-gray-500 text-end">
+              {DateUtils.formatISOString(value)}
+            </p>
           </div>
         );
       case "items":
@@ -343,6 +366,15 @@ const OrderDetails = () => {
                 textSm="Ver factura"
                 text="Ver factura"
                 theme="success"
+              ></ResponsiveButton>
+            )}
+
+            {debugMode && (
+              <ResponsiveButton
+                textSm="Eliminar orden"
+                text="Eliminar orden"
+                theme="danger"
+                onClick={() => handleDeleteOrder(order.id!)}
               ></ResponsiveButton>
             )}
           </div>

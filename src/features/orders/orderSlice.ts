@@ -15,13 +15,17 @@ export interface WorkOrder {
   receiptDate: string;
   mileageTimestamp?: string;
   deliveryDate?: string;
-  licensePlate: string;
-  items: string[];
+  vehicleId: string;
+  vehicleLicensePlate: string;
+  customerId: string;
+  customerFullName: string;
+  workerId: string;
+  workerFullName: string;
+  items: string;
   status: WorkOrderStatus | string;
   notes: string;
   cost: number;
-  responsibleMechanic: string;
-  responsibleMechanicId: string;
+  createdAt: string;
 }
 export interface WorkOrdersState {
   orders: WorkOrder[];
@@ -31,9 +35,9 @@ export interface WorkOrdersState {
 export const moduleName = "orders";
 
 const initialState: WorkOrdersState = {
-  //   orders: [],
+  orders: [],
   // DEBUG ONLY
-  orders: WorkOrdersMocks.initialWorkOrders,
+  // orders: WorkOrdersMocks.initialWorkOrders,
   status: "idle",
 };
 
@@ -51,10 +55,16 @@ const ordersSlice = createSlice({
       const orderIndex = state.orders.findIndex((order) => order.id === id);
       state.orders[orderIndex] = action.payload;
     },
+
+    removeOrder: (state, action: PayloadAction<string>) => {
+      const { payload: id } = action;
+      const orderIndex = state.orders.findIndex((order) => order.id === id);
+      state.orders.splice(orderIndex, 1);
+    },
   },
 });
 
-export const { addOrder, updateOrder } = ordersSlice.actions;
+export const { addOrder, updateOrder, removeOrder } = ordersSlice.actions;
 
 export const selectOrders = (state: AppState) => state.orders.orders;
 

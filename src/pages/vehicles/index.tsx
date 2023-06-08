@@ -146,7 +146,7 @@ function Vehicles() {
                 </div>
                 <div className="flex flex-row items-center text-gray-500 text-md gap-x-1 mb-4">
                   <p>Cliente</p> <div style={separatorStyle} className=""></div>
-                  <p>{vehicle.ownerFullName.slice(0, 10)}</p>
+                  <p>{vehicle.ownerFullName.slice(0, 18)}</p>
                 </div>
 
                 <div className="flex flex-row items-center text-gray-500 text-sm gap-x-2">
