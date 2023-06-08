@@ -22,7 +22,7 @@ function NavBar() {
   return (
     <nav className="bg-white border-gray-200">
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="#" className="flex items-center">
+        <Link href="/" className="flex items-center">
           <img
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQISo3mE5Rd6kDPOQoYo0bNHfO-bVJDIfF8uTb8IppqxnYELlBB9cCLVT2y6-Zrcgm7wg&usqp=CAU"
             className="h-8 mr-3"
@@ -31,7 +31,7 @@ function NavBar() {
           <span className="self-center text-2xl font-semibold whitespace-nowrap">
             Taller 3BS
           </span>
-        </a>
+        </Link>
         <button
           data-collapse-toggle="navbar-default"
           type="button"
