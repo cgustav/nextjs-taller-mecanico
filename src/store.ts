@@ -13,8 +13,40 @@ import vehiclesReducer, {
 import ordersReducer, {
   moduleName as ordersRef,
 } from "./features/orders/orderSlice";
-import storage from "redux-persist/lib/storage";
+
+import personnelReducer, {
+  moduleName as personnelRef,
+} from "./features/personnel/personnelSlice";
+
+// import storage from "redux-persist/lib/storage";
+// import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+
 import { createWrapper, Context, HYDRATE } from "next-redux-wrapper";
+
+/**
+ * Applying NoopStorage Patch to solve
+ * redux-persist failed to create sync storage. falling back to noop storage Exception
+ */
+import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+
+const createNoopStorage = () => {
+  return {
+    getItem(_key: any) {
+      return Promise.resolve(null);
+    },
+    setItem(_key: any, value: any) {
+      return Promise.resolve(value);
+    },
+    removeItem(_key: any) {
+      return Promise.resolve();
+    },
+  };
+};
+
+const storage =
+  typeof window !== "undefined"
+    ? createWebStorage("local")
+    : createNoopStorage();
 
 export enum MODULE_STATUS {
   IDLE = "idle",
@@ -25,6 +57,7 @@ export enum MODULE_STATUS {
 const rootReducer = combineReducers({
   vehicles: vehiclesReducer,
   orders: ordersReducer,
+  personnel: personnelReducer,
 });
 
 const makeConfiguredStore = () =>
@@ -43,13 +76,15 @@ export const makeStore = () => {
 
   if (isServer) {
     return makeConfiguredStore();
+    //
   } else {
     // we need it only on client side
     const persistConfig = {
       key: "nextjs",
-      whitelist: ["auth", vehiclesRef, ordersRef], // make sure it does not clash with server keys
+      whitelist: ["auth", vehiclesRef, ordersRef, personnelRef], // make sure it does not clash with server keys
       storage,
     };
+
     const persistedReducer = persistReducer(persistConfig, rootReducer);
     let store: any = configureStore({
       reducer: persistedReducer,

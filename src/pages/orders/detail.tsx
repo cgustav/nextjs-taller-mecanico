@@ -232,9 +232,6 @@ const OrderDetails = () => {
   };
 
   const factoryOrderRow = (key: string, value: any) => {
-    //   <SummaryRow
-    // label={labelMappping[key]}
-
     switch (key) {
       case "cost":
         return (
