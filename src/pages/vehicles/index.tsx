@@ -11,6 +11,10 @@ import Image from "next/image";
 import { regular, solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import FormHeader from "../../components/shared/form-header";
 import ConfirmationAlert from "../../components/shared/confirm-alert";
+import { useRouter } from "next/router";
+import { getUserRole } from "../../features/auth/tools";
+import { ALLOWED_ROLES, USER_ROLES } from "../../features/auth/authSlice";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
 
 const separatorStyle = {
   width: "3px",
@@ -20,6 +24,7 @@ const separatorStyle = {
 };
 
 function Vehicles() {
+  const allowedRoles = [USER_ROLES.ADMIN, USER_ROLES.PERSONNEL];
   const dispatch = useAppDispatch();
   const vehicles = useAppSelector(selectVehicles);
 
@@ -30,14 +35,11 @@ function Vehicles() {
   const [showDeletionVehicleAlert, setShowDeletionVehicleAlert] =
     useState(false);
 
+  /**
+   * Hook para establecer el id del vehículo que se desea
+   * eliminar/actualizar.
+   */
   const [targetVehicleId, setTargetVehicleId] = useState<string>("");
-
-  // const status = useAppSelector(selectVehicles);
-
-  //   const { data, loading, error } = useQuery(VEHICLES_QUERY);
-
-  // if (status === MODULE_STATUS.LOADING) return <p>Loading...</p>;
-  // if (status === MODULE_STATUS.FAILED) return <p>Error :(</p>;
 
   const handleVehicleDeletion = (vehicle: Vehicle) => {
     console.log("Deleting vehicle: ", vehicle);
@@ -57,8 +59,15 @@ function Vehicles() {
     setShowDeletionVehicleAlert(false);
   };
 
-  console.log("Fetching vehicles: ", vehicles);
-  console.log("Vehicles Type: ", typeof vehicles);
+  const router = useRouter();
+
+  useEffect(() => {
+    // const userRole = getUserRole();
+    // if (!userRole || !allowedRoles.includes(userRole)) {
+    //   router.push("/signin"); // Redirigir a una página de acceso no autorizado si el usuario no tiene el rol permitido
+    // }
+    AuthorizationUtils.useRoleGuard(allowedRoles, router);
+  }, []);
 
   return (
     <div className="flex items-center justify-center py-4 md:py-2">

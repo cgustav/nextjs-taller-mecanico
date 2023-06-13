@@ -28,6 +28,8 @@ import billingReducer, {
   moduleName as billingRef,
 } from "./features/billing/billingSlice";
 
+import authReducer, { moduleName as authRef } from "./features/auth/authSlice";
+
 import { createWrapper } from "next-redux-wrapper";
 
 /**
@@ -67,6 +69,7 @@ const rootReducer = combineReducers({
   personnel: personnelReducer,
   customers: customerReducer,
   billings: billingReducer,
+  auth: authReducer,
 });
 
 const makeConfiguredStore = () =>
@@ -85,7 +88,7 @@ export const makeStore = () => {
     const persistConfig = {
       key: "nextjs",
       whitelist: [
-        "auth",
+        authRef,
         vehiclesRef,
         ordersRef,
         personnelRef,
