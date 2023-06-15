@@ -1,7 +1,7 @@
 import FormHeader from "../../components/shared/form-header";
 import ResponsiveButton from "../../components/shared/responsive-button";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppSelector, useAppDispatch } from "../../hooks";
 import {
   Customer,
@@ -12,6 +12,9 @@ import ConfirmationAlert from "../../components/shared/confirm-alert";
 import { regular, solid } from "@fortawesome/fontawesome-svg-core/import.macro";
 import CustomerInfoModal from "../../components/customers/infoModal/modal";
 import { Vehicle, selectVehicles } from "../../features/vehicles/vehicleSlice";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { useRouter } from "next/router";
+import { USER_ROLES } from "../../features/auth/authSlice";
 
 function Customers() {
   const dispatch = useAppDispatch();
@@ -62,6 +65,12 @@ function Customers() {
     const emailMatches = new RegExp(searchTerm, "ig").test(customer.email);
     return nameMatches || rutMatches || emailMatches;
   };
+
+  const router = useRouter();
+
+  useEffect(() => {
+    AuthorizationUtils.useRoleGuard([USER_ROLES.ADMIN], router);
+  }, []);
 
   return (
     <div className="md:px-40 px-6">

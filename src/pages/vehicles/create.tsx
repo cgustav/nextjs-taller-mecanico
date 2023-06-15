@@ -14,6 +14,8 @@ import type { AppState } from "../../store";
 import GreenAlert from "../../components/shared/green-alert";
 import ErrorLabel from "../../components/shared/error-label";
 import { VehicleTools } from "../../features/vehicles/tools";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { USER_ROLES } from "../../features/auth/authSlice";
 
 export interface CreateVehicleFormInputProps {
   id: string;
@@ -320,6 +322,11 @@ function CreateVehicle() {
   //re-rendering.
   useEffect(() => {
     console.log("CreateVehicle useEffect");
+
+    AuthorizationUtils.useRoleGuard(
+      [USER_ROLES.ADMIN, USER_ROLES.PERSONNEL],
+      router
+    );
 
     if (vehicleId?.length && isEditing) {
       const foundVehicle = findVehicleById(baseVehicles, vehicleId as string);

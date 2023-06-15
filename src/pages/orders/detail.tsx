@@ -22,6 +22,9 @@ import {
 } from "../../features/customers/customerSlice";
 import Link from "next/link";
 import { Billing, selectBillings } from "../../features/billing/billingSlice";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { USER_ROLES } from "../../features/auth/authSlice";
+import ProtectedItem from "../../components/shared/protected-item";
 
 const debugMode = true;
 
@@ -101,6 +104,12 @@ const OrderDetails = () => {
 
   useEffect(() => {
     console.log("useEffect");
+
+    AuthorizationUtils.useRoleGuard(
+      [USER_ROLES.ADMIN, USER_ROLES.PERSONNEL],
+      router
+    );
+
     if (orderId && orderId.length && typeof orderId === "string") {
       console.log("validating orderId");
       const foundOrder = getOrderById(fetched_orders, orderId);
@@ -358,55 +367,71 @@ const OrderDetails = () => {
           <hr className="my-8 mt-14" />
           <div className="flex flex-row align-start gap-x-4">
             {order.status === WorkOrderStatus.PENDING && (
-              <ResponsiveButton
-                textSm="Facturar"
-                text="Generar factura"
-                theme="success"
-                onClick={onCreateBilling}
-              ></ResponsiveButton>
+              <ProtectedItem whiteList={[USER_ROLES.ADMIN]}>
+                <ResponsiveButton
+                  textSm="Facturar"
+                  text="Generar factura"
+                  theme="success"
+                  onClick={onCreateBilling}
+                />
+              </ProtectedItem>
             )}
 
             {order.status === WorkOrderStatus.IN_PROGRESS && (
-              <ResponsiveButton
-                textSm="Completar"
-                text="Completar orden"
-                theme="warning"
-                onClick={() => onUpdateBillingStatus(WorkOrderStatus.PENDING)}
-              ></ResponsiveButton>
+              <ProtectedItem
+                whiteList={[USER_ROLES.ADMIN, USER_ROLES.PERSONNEL]}
+              >
+                <ResponsiveButton
+                  textSm="Completar"
+                  text="Completar orden"
+                  theme="warning"
+                  onClick={() => onUpdateBillingStatus(WorkOrderStatus.PENDING)}
+                />
+              </ProtectedItem>
             )}
 
             {order.status !== WorkOrderStatus.BILLED &&
               order.status !== WorkOrderStatus.CANCELLED && (
-                <ResponsiveButton
-                  textSm="Cancelar"
-                  text="Cancelar orden"
-                  theme="danger"
-                  onClick={() =>
-                    onUpdateBillingStatus(WorkOrderStatus.CANCELLED)
-                  }
-                ></ResponsiveButton>
+                <ProtectedItem
+                  whiteList={[USER_ROLES.ADMIN, USER_ROLES.PERSONNEL]}
+                >
+                  <ResponsiveButton
+                    textSm="Cancelar"
+                    text="Cancelar orden"
+                    theme="danger"
+                    onClick={() =>
+                      onUpdateBillingStatus(WorkOrderStatus.CANCELLED)
+                    }
+                  />
+                </ProtectedItem>
               )}
 
             {order.status == WorkOrderStatus.BILLED && (
-              <Link
-                href={`/orders/invoice?orderId=${order.id}`}
-                // className="px-6 py-4 pb-4 text-blue-500 hover:underline"
+              <ProtectedItem
+                whiteList={[USER_ROLES.ADMIN, USER_ROLES.PERSONNEL]}
               >
-                <ResponsiveButton
-                  textSm="Ver factura"
-                  text="Ver factura"
-                  theme="success"
-                ></ResponsiveButton>
-              </Link>
+                <Link
+                  href={`/orders/invoice?orderId=${order.id}`}
+                  // className="px-6 py-4 pb-4 text-blue-500 hover:underline"
+                >
+                  <ResponsiveButton
+                    textSm="Ver factura"
+                    text="Ver factura"
+                    theme="success"
+                  />
+                </Link>
+              </ProtectedItem>
             )}
 
             {debugMode && (
-              <ResponsiveButton
-                textSm="Eliminar orden"
-                text="Eliminar orden"
-                theme="danger"
-                onClick={() => handleDeleteOrder(order.id!)}
-              ></ResponsiveButton>
+              <ProtectedItem whiteList={[USER_ROLES.ADMIN]}>
+                <ResponsiveButton
+                  textSm="Eliminar orden"
+                  text="Eliminar orden"
+                  theme="danger"
+                  onClick={() => handleDeleteOrder(order.id!)}
+                ></ResponsiveButton>
+              </ProtectedItem>
             )}
           </div>
         </div>

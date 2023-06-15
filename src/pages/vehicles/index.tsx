@@ -24,7 +24,6 @@ const separatorStyle = {
 };
 
 function Vehicles() {
-  const allowedRoles = [USER_ROLES.ADMIN, USER_ROLES.PERSONNEL];
   const dispatch = useAppDispatch();
   const vehicles = useAppSelector(selectVehicles);
 
@@ -62,11 +61,10 @@ function Vehicles() {
   const router = useRouter();
 
   useEffect(() => {
-    // const userRole = getUserRole();
-    // if (!userRole || !allowedRoles.includes(userRole)) {
-    //   router.push("/signin"); // Redirigir a una página de acceso no autorizado si el usuario no tiene el rol permitido
-    // }
-    AuthorizationUtils.useRoleGuard(allowedRoles, router);
+    AuthorizationUtils.useRoleGuard(
+      [USER_ROLES.ADMIN, USER_ROLES.PERSONNEL],
+      router
+    );
   }, []);
 
   return (

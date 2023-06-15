@@ -4,6 +4,8 @@ import { useRouter } from "next/router";
 import type { AppState } from "../../store";
 import { selectBillings } from "../../features/billing/billingSlice";
 import { DateUtils } from "../../utils/date.utils";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { USER_ROLES } from "../../features/auth/authSlice";
 
 const findBillingByOrderId = (collection: any[], orderId: string) => {
   return (
@@ -61,6 +63,10 @@ const InvoiceDetail = () => {
 
   useEffect(() => {
     console.log("CreateVehicle useEffect");
+
+    // NOTE: Sin proteccion para permitir envio a través de
+    // correo electronico (CU Hipotético)
+    // AuthorizationUtils.useRoleGuard([USER_ROLES.ADMIN], router);
 
     if (orderId?.length) {
       const foundBilling = findBillingByOrderId(

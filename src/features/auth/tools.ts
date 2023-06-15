@@ -31,6 +31,11 @@ export const getUserRole = () => {
   return null; // Si no hay usuario, retornar null o algún valor que indique que el rol no está definido
 };
 
+// export const getUser = () => {
+// Obtener el usuario desde el estado global
+//   const user = useSelector(selectUser);
+// const globalState = localStorage.getItem("persist:nextjs");
+
 export class AuthTools {
   public static validateSignInData = (data: any): any => {
     let validationErrors: any = {};

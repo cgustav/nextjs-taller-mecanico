@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FormHeader from "../../components/shared/form-header";
 import numeral from "numeral";
 import Link from "next/link";
@@ -8,6 +8,9 @@ import {
   WorkOrderStatus,
   selectOrders,
 } from "../../features/orders/orderSlice";
+import { useRouter } from "next/router";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { USER_ROLES } from "../../features/auth/authSlice";
 
 function Orders() {
   const fetched_orders = useAppSelector(selectOrders);
@@ -18,65 +21,6 @@ function Orders() {
 
   const itemsPerPage = 10; // Número de elementos por página
   const [currentPage, setCurrentPage] = useState(1);
-
-  // const data = [
-  //   {
-  //     id: 1,
-  //     fecha_recepcion: "2023-05-01",
-  //     fecha_entrega: "2023-05-10",
-  //     patente_vehiculo: "EEAR44",
-  //     concepto: "Cambio de aceite",
-  //     mecanico_a_cargo: "John Doe",
-  //     status: "En progreso",
-  //     costo_estimado: 12500,
-  //   },
-  //   {
-  //     id: 2,
-  //     fecha_recepcion: "2023-05-01",
-  //     fecha_entrega: "2023-05-10",
-  //     patente_vehiculo: "EMJF23",
-  //     concepto: "Balanceo",
-  //     mecanico_a_cargo: "John Doe",
-  //     status: "En progreso",
-  //     costo_estimado: 50000,
-  //   },
-  //   {
-  //     id: 3,
-  //     fecha_recepcion: "2023-05-01",
-  //     fecha_entrega: "2023-05-10",
-  //     patente_vehiculo: "ABC123",
-  //     concepto: "Cambio de guardapolvo",
-  //     mecanico_a_cargo: "Christian Vera",
-  //     status: "En progreso",
-  //     costo_estimado: 40000,
-  //   },
-  //   {
-  //     id: 4,
-  //     fecha_recepcion: "2023-05-01",
-  //     fecha_entrega: "2023-05-10",
-  //     patente_vehiculo: "XVBH12",
-  //     concepto: "Reparación de motor",
-  //     mecanico_a_cargo: "John Doe",
-  //     status: "Facturado",
-  //     costo_estimado: 185000,
-  //   },
-  //   {
-  //     id: 5,
-  //     fecha_recepcion: "2023-05-01",
-  //     fecha_entrega: "2023-05-10",
-  //     patente_vehiculo: "AA5671",
-  //     concepto: "Cambio de aceite",
-  //     mecanico_a_cargo: "Justiniano Carrasco",
-  //     status: "Facturado",
-  //     costo_estimado: 12500,
-  //   },
-  //   // ... más órdenes de trabajo
-  // ];
-
-  // Filtrar los datos basado en el término de búsqueda
-  //   const filteredData = data.filter((item) =>
-  //     item.patente_vehiculo.toLowerCase().includes(searchTerm.toLowerCase())
-  //   );
 
   // Calcular el índice inicial y final de los elementos a mostrar
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -89,11 +33,6 @@ function Orders() {
 
   // Obtener los elementos correspondientes a la página actual
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-  //   const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-
-  // Calcular el número total de páginas
-  //   const totalPages = Math.ceil(data.length / itemsPerPage);
 
   // Calcular el número total de páginas
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -123,6 +62,15 @@ function Orders() {
         return "px-6 py-4 border-b border-gray-200";
     }
   };
+
+  const router = useRouter();
+
+  useEffect(() => {
+    AuthorizationUtils.useRoleGuard(
+      [USER_ROLES.ADMIN, USER_ROLES.PERSONNEL],
+      router
+    );
+  }, []);
 
   return (
     <div className="md:px-40 px-6">

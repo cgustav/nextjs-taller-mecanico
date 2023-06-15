@@ -22,6 +22,9 @@ export interface User {
   role: string;
   token: string;
   isEnabled: boolean;
+  lastLogin?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AuthState {
@@ -58,6 +61,17 @@ export const authSlice = createSlice({
       //   state.status = "loading";
       state.registered.push(action.payload);
     },
+    updateUser: (state, action: PayloadAction<User>) => {
+      const index = state.registered.findIndex(
+        (user) => user.id === action.payload.id
+      );
+      console.log("Update user action index ", index);
+      console.log(
+        "Update user action found user xddd: ",
+        state.registered[index]
+      );
+      state.registered[index] = action.payload;
+    },
   },
   //   extraReducers: (builder) => {
   //     builder.addCase(login.fulfilled, (state, action) => {
@@ -67,7 +81,7 @@ export const authSlice = createSlice({
   //   },
 });
 
-export const { login, signup } = authSlice.actions;
+export const { login, logout, signup, updateUser } = authSlice.actions;
 
 export const selectUser = (state: AppState): User | null =>
   state.auth.authenticated;

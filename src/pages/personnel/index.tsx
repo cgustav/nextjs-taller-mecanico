@@ -7,6 +7,9 @@ import {
   selectPersonnel,
 } from "../../features/personnel/personnelSlice";
 import ResponsiveButton from "../../components/shared/responsive-button";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { USER_ROLES } from "../../features/auth/authSlice";
+import { useRouter } from "next/router";
 
 function Personnel() {
   // Obtner el estado de la lista de personal desde el store
@@ -43,6 +46,18 @@ function Personnel() {
   const goToNextPage = () => {
     setCurrentPage((prevPage) => prevPage + 1);
   };
+
+  const router = useRouter();
+
+  useEffect(
+    () => {
+      // setCurrentPage(1);
+      AuthorizationUtils.useRoleGuard([USER_ROLES.ADMIN], router);
+    },
+    [
+      /*searchTerm, selectedField*/
+    ]
+  );
 
   return (
     <div className="md:px-40 px-6">

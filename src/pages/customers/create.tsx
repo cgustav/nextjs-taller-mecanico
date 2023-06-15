@@ -13,6 +13,8 @@ import type { AppState } from "../../store";
 import GreenAlert from "../../components/shared/green-alert";
 import ErrorLabel from "../../components/shared/error-label";
 import { CustomerTools } from "../../features/customers/tools";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { USER_ROLES } from "../../features/auth/authSlice";
 
 export interface CreateCustomerFormInputProps {
   id: string;
@@ -195,12 +197,15 @@ function CreateCustomer() {
   console.log("Is editing: ", isEditing);
 
   const dispatch = useDispatch();
+  // const router = useRouter();
 
   //NOTE: Will only be executed at the time of initial
   //rendering and it will not be executed on component
   //re-rendering.
   useEffect(() => {
     console.log("CreateVehicle useEffect");
+
+    AuthorizationUtils.useRoleGuard([USER_ROLES.ADMIN], router);
 
     if (customerId?.length && isEditing) {
       const foundCustomer = findCustomerById(

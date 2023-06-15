@@ -4,10 +4,6 @@ export class CreateBillingModalTools {
   public static validateBussinessFormData(data: any) {
     let validationErrors: any = {};
 
-    // if(!data.rut){
-
-    // }
-
     if (!data.fullName) {
       validationErrors.fullName = "Nombre de empresa es requerido";
     } else if (data.fullName.length < 3) {

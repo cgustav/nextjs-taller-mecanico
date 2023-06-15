@@ -18,6 +18,15 @@ import {
   MechanicPersonnel,
   selectPersonnel,
 } from "../../features/personnel/personnelSlice";
+import {
+  USER_ROLES,
+  User,
+  selectRegistered,
+  signup,
+  updateUser,
+} from "../../features/auth/authSlice";
+import { base } from "@faker-js/faker";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
 
 export interface CreateVehicleFormInputProps {
   id: string;
@@ -147,11 +156,26 @@ const findPersonnelById = (collection: any[], id: string) => {
   return collection.find((person: any) => person.id === id) || null;
 };
 
+const findElementByEmail = (collection: any[], email: string) => {
+  // Implementa la lógica para buscar el vehículo por su ID en el estado
+  return collection.find((person: any) => person.email === email) || null;
+};
+
 function CreatePersonnel() {
   const router = useRouter();
   //   const basePersonnel = useSelector((state: any) => state.personnel);
   // Obtner el estado de la lista de personal desde el store
   const basePersonnel = useAppSelector(selectPersonnel);
+  const baseAuthUsers = useAppSelector(selectRegistered);
+
+  /**
+   * Estado para confirmación de nuevo usuario
+   * de personal de trabajo.
+   */
+  const [credentials, setCredentials] = useState({
+    password: "",
+    confirmPassword: "",
+  });
 
   /**
    * Estado del vehículo
@@ -172,6 +196,18 @@ function CreatePersonnel() {
     phone: "",
     isActive: true,
     createdAt: "",
+  });
+
+  const [authUser, setAuthUserState] = useState<User>({
+    id: "",
+    email: "",
+    password: "",
+    name: "",
+    role: "",
+    token: "",
+    isEnabled: false,
+    createdAt: "",
+    updatedAt: "",
   });
 
   /**
@@ -196,19 +232,31 @@ function CreatePersonnel() {
   useEffect(() => {
     console.log("CreatePersonnel useEffect");
 
+    AuthorizationUtils.useRoleGuard([USER_ROLES.ADMIN], router);
+
     if (workerId?.length && isEditing) {
       const foundPersonnel = findPersonnelById(
         basePersonnel,
         workerId as string
       );
+
       console.log("Found personnel: ", foundPersonnel);
 
       if (foundPersonnel) {
+        const foundAuthUser = findElementByEmail(
+          baseAuthUsers,
+          foundPersonnel.email as string
+        );
+
+        console.log("Found auth user: ", foundAuthUser);
+
         setPersonnelState(foundPersonnel);
-        console.log("Setting vehicle state: ", foundPersonnel);
+        setAuthUserState(foundAuthUser);
+
+        // console.log("Setting vehicle state: ", foundPersonnel);
       }
     }
-  }, [workerId, basePersonnel]);
+  }, [workerId, basePersonnel, baseAuthUsers]);
 
   //   console.log("Current personnel state: ", personnel);
 
@@ -220,10 +268,23 @@ function CreatePersonnel() {
       value = value.toUpperCase();
     }
 
-    const validationErrors = PersonnelTools.validatePersonnelData({
+    const personnelErrors = PersonnelTools.validatePersonnelData({
       ...personnel,
       [name]: value,
     });
+
+    const credentialsErrors = !isEditing
+      ? PersonnelTools.validateCredentials({
+          ...credentials,
+          [name]: value,
+        })
+      : {};
+
+    const validationErrors = Object.assign(
+      {},
+      personnelErrors,
+      credentialsErrors
+    );
 
     if (validationErrors[name]) {
       setErrors({
@@ -237,10 +298,17 @@ function CreatePersonnel() {
       });
     }
 
-    setPersonnelState({
-      ...personnel,
-      [name]: value,
-    });
+    if (name === "password" || name === "confirmPassword") {
+      setCredentials({
+        ...credentials,
+        [name]: value,
+      });
+    } else {
+      setPersonnelState({
+        ...personnel,
+        [name]: value,
+      });
+    }
   };
 
   const handleTaskCreation = () => {
@@ -249,11 +317,36 @@ function CreatePersonnel() {
 
     console.log("[handleTaskCreation]: ", personnel);
     dispatch(addPersonnel(personnel));
+
+    const user = {
+      id: uuid(),
+      email: personnel.email,
+      password: credentials.password,
+      name: personnel.fullName,
+      role: USER_ROLES.PERSONNEL,
+      token: "",
+      isEnabled: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    dispatch(signup(user));
   };
 
   const handleTaskUpdate = () => {
     console.log("[handleTaskUpdate]: ", personnel);
+
     dispatch(updatePersonnel(personnel));
+
+    // TODO - DEACTIVATE THIS IF HANDLE AUTHENTICATION MODULE VIA API
+
+    const user = {
+      ...authUser,
+      email: personnel.email,
+      name: personnel.fullName,
+      updatedAt: new Date().toISOString(),
+    };
+
+    dispatch(updateUser(user));
   };
 
   const handleSubmit = (e: any) => {
@@ -261,7 +354,18 @@ function CreatePersonnel() {
     console.log("handleSubmit vehicle: ", personnel);
 
     // Validar los datos del formulario antes de enviar
-    const validationErrors = PersonnelTools.validatePersonnelData(personnel);
+    // const validationErrors = PersonnelTools.validatePersonnelData(personnel);
+
+    const personnelErrors = PersonnelTools.validatePersonnelData(personnel);
+    const credentialsErrors = !isEditing
+      ? PersonnelTools.validateCredentials(credentials)
+      : {};
+
+    const validationErrors = Object.assign(
+      {},
+      personnelErrors,
+      credentialsErrors
+    );
 
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors);
@@ -367,12 +471,42 @@ function CreatePersonnel() {
               id="cvf_person_email"
               label="Correo Electrónico"
               inputName="email"
+              inputType="email"
               placeholder="j.huerta@gmail.com"
               maxLength={180}
               onChange={handleChange}
               value={personnel.email}
               error={errors.email}
             />
+
+            {!isEditing && (
+              <FormInput
+                id="cvf_person_password"
+                label="Contraseña"
+                inputName="password"
+                inputType="password"
+                placeholder="*******"
+                maxLength={30}
+                onChange={handleChange}
+                value={credentials.password}
+                error={errors.password}
+              />
+            )}
+
+            {!isEditing && (
+              <FormInput
+                id="cvf_person_confirm_password"
+                label="Repetir Contraseña"
+                inputName="confirmPassword"
+                inputType="password"
+                placeholder="*******"
+                maxLength={30}
+                onChange={handleChange}
+                value={credentials.confirmPassword}
+                error={errors.confirmPassword}
+              />
+            )}
+
             <FormInput
               id="cvf_person_phone"
               label="Teléfono"

@@ -13,6 +13,16 @@ import {
 } from "../../features/personnel/personnelSlice";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  USER_ROLES,
+  User,
+  selectRegistered,
+  updateUser,
+} from "../../features/auth/authSlice";
+import { DateUtils } from "../../utils/date.utils";
+import CredentialsModal from "../../components/personnel/credentialsModal/modal";
+import RedAlert from "../../components/shared/red-alert";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
 
 const PersonnelDetail = () => {
   const router = useRouter();
@@ -20,6 +30,7 @@ const PersonnelDetail = () => {
 
   //   const imageUrl = faker.image.avatar();
   const fetched_personnel = useAppSelector(selectPersonnel);
+  const fetched_registered = useAppSelector(selectRegistered);
 
   const { workerId } = router.query;
 
@@ -32,6 +43,10 @@ const PersonnelDetail = () => {
   const findWorkerById = (collection: any[], id: string) => {
     // Implementa la lógica para buscar el vehículo por su ID en el estado
     return collection.find((el: any) => el.id === id) || null;
+  };
+
+  const findElementByEmail = (collection: any[], email: string) => {
+    return collection.find((el: any) => el.email === email) || null;
   };
 
   const [worker, setWorkerState] = useState({
@@ -47,41 +62,22 @@ const PersonnelDetail = () => {
     createdAt: "",
   });
 
-  //NOTE: Will only be executed at the time of initial
-  //rendering and it will not be executed on component
-  //re-rendering.
-  useEffect(() => {
-    console.log("CreateVehicle useEffect");
-
-    if (workerId?.length && isEditing) {
-      const foundWorker = findWorkerById(fetched_personnel, workerId as string);
-      console.log("Found vehicle: ", foundWorker);
-
-      if (foundWorker) {
-        setWorkerState(foundWorker);
-        console.log("Setting vehicle state: ", foundWorker);
-      }
-    }
-  }, [workerId, fetched_personnel]);
-
-  //   const worker = {
-  //     id: "9a35a7d3-a692-4434-9b84-917f3101ee96",
-  //     nombre: faker.name.firstName(),
-  //     apellido: faker.name.lastName(),
-  //     edad: faker.datatype.number(),
-  //     rut: faker.datatype.number(),
-  //     direccion: faker.address.streetAddress(),
-  //     // telefono: faker.phone.phoneNumber(),
-  //     specialty: faker.name.jobArea(),
-  //     email: faker.internet.email(),
-  //     cargo: faker.name.jobTitle(),
-  //     birthdate: faker.date.past(),
-  //     phone: faker.phone.number(),
-  //     address: faker.address.streetAddress(),
-  //     isActive: true,
-  //   };
+  const [authUser, setAuthUser] = useState<User>({
+    id: "",
+    email: "",
+    password: "",
+    name: "",
+    role: "",
+    token: "",
+    createdAt: "",
+    isEnabled: true,
+    lastLogin: "",
+  });
 
   const [showConfirmationModal, setShowOrderUpdateModal] =
+    React.useState(false);
+
+  const [showSuccessCredentialsModal, setShowSuccessCredentialsModal] =
     React.useState(false);
 
   const [modalConfig, setModalConfig] = useState({
@@ -91,6 +87,43 @@ const PersonnelDetail = () => {
     onConfirm: () => {},
     onClose: () => {},
   });
+
+  const [showCredentialsModal, setShowCredentialsModal] = React.useState(false);
+
+  const showCredentialsModalHandler = () => setShowCredentialsModal(true);
+  const hideCredentialsModalHandler = () => setShowCredentialsModal(false);
+
+  //NOTE: Will only be executed at the time of initial
+  //rendering and it will not be executed on component
+  //re-rendering.
+
+  useEffect(() => {
+    console.log("CreateVehicle useEffect");
+
+    AuthorizationUtils.useRoleGuard([USER_ROLES.ADMIN], router);
+
+    if (workerId?.length && isEditing) {
+      const foundWorker = findWorkerById(fetched_personnel, workerId as string);
+      console.log("Found vehicle: ", foundWorker);
+
+      if (foundWorker) {
+        setWorkerState(foundWorker);
+
+        const foundAuthUser = findElementByEmail(
+          fetched_registered,
+          foundWorker.email
+        );
+
+        console.log("Found auth user: ", foundAuthUser);
+
+        if (foundAuthUser) {
+          setAuthUser(foundAuthUser);
+        }
+
+        // console.log("Setting vehicle state: ", foundWorker);
+      }
+    }
+  }, [workerId, fetched_personnel /*fetched_registered*/]);
 
   const onChangeWorkerStatus = () => {
     const deactivationMessage =
@@ -104,6 +137,7 @@ const PersonnelDetail = () => {
       cancelButtonText: "Cancelar",
       onConfirm: () => {
         updateWorkerStatus();
+        updateAuthUserStatus();
         setShowOrderUpdateModal(false);
       },
       onClose: () => {
@@ -113,6 +147,16 @@ const PersonnelDetail = () => {
     setShowOrderUpdateModal(true);
   };
 
+  const updateAuthUserStatus = () => {
+    const authChanges = {
+      ...authUser,
+      isEnabled: !authUser.isEnabled,
+    };
+    console.log("Auth changes: ", authChanges);
+    setAuthUser(authChanges);
+    dispatch(updateUser(authChanges));
+  };
+
   const updateWorkerStatus = () => {
     const workerChanges = {
       ...worker,
@@ -120,6 +164,11 @@ const PersonnelDetail = () => {
     };
     setWorkerState(workerChanges);
     dispatch(updatePersonnel(workerChanges));
+  };
+
+  const onCloseShowCredentialsModal = () => {
+    setShowCredentialsModal(false);
+    setShowSuccessCredentialsModal(true);
   };
 
   return (
@@ -133,6 +182,22 @@ const PersonnelDetail = () => {
           confirmButtonText={modalConfig.confirmButtonText}
           cancelButtonText={modalConfig.cancelButtonText}
         ></ConfirmationAlert>
+      )}
+
+      {}
+
+      {showCredentialsModal && (
+        <CredentialsModal
+          onClose={onCloseShowCredentialsModal}
+          currentUser={authUser}
+        ></CredentialsModal>
+      )}
+
+      {showSuccessCredentialsModal && (
+        <RedAlert
+          message="Credenciales actualizadas correctamente"
+          onClose={() => setShowSuccessCredentialsModal(false)}
+        ></RedAlert>
       )}
 
       <div className="flex items-center justify-center py-4 md:py-2">
@@ -183,6 +248,15 @@ const PersonnelDetail = () => {
                 </div>
 
                 <div>
+                  <p className="text-gray-600">Última conexión:</p>
+                  <p className="text-lg font-medium">
+                    {authUser?.lastLogin
+                      ? DateUtils.formatISOStringWithTime(authUser.lastLogin)
+                      : "-"}
+                  </p>
+                </div>
+
+                <div>
                   <p className="text-gray-600">Estado:</p>
                   <p
                     className={`text-lg font-medium ${
@@ -202,6 +276,16 @@ const PersonnelDetail = () => {
                         theme="warning"
                       ></ResponsiveButton>
                     </Link>
+                  )}
+                  {worker.isActive && (
+                    // <Link href={`/personnel/create?workerId=${worker.id}`}>
+                    <ResponsiveButton
+                      textSm="Credenciales"
+                      text="Actualizar credenciales"
+                      theme="warning"
+                      onClick={() => showCredentialsModalHandler()}
+                    ></ResponsiveButton>
+                    // </Link>
                   )}
                   <ResponsiveButton
                     textSm={worker.isActive ? "Desactivar" : "Activar"}

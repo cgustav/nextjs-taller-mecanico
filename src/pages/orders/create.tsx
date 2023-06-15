@@ -24,6 +24,8 @@ import {
 } from "../../features/orders/orderSlice";
 import { WorkOrderTools } from "../../features/orders/tools";
 import { selectPersonnel } from "../../features/personnel/personnelSlice";
+import { AuthorizationUtils } from "../../utils/authorization.utils";
+import { USER_ROLES } from "../../features/auth/authSlice";
 
 export interface CreateCustomerFormInputProps {
   id: string;
@@ -227,6 +229,7 @@ function CreateWorkOrder() {
   //rendering and it will not be executed on component
   //re-rendering.
   useEffect(() => {
+    AuthorizationUtils.useRoleGuard([USER_ROLES.ADMIN], router);
     console.log("CreateVehicle useEffect");
 
     if (workOrderId?.length && isEditing) {

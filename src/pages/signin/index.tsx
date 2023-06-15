@@ -2,10 +2,19 @@
 // import numeral from "numeral";
 
 import { useEffect, useState } from "react";
-import { Credentials, USER_ROLES, login, selectUser } from "../../features/auth/authSlice";
+import {
+  Credentials,
+  USER_ROLES,
+  User,
+  login,
+  selectRegistered,
+  selectUser,
+  updateUser,
+} from "../../features/auth/authSlice";
 import { AuthTools } from "../../features/auth/tools";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
+import ErrorLabel from "../../components/shared/error-label";
 
 // const OrderDetails = ({ order }) => {
 //   return (
@@ -44,7 +53,9 @@ import { useRouter } from "next/router";
 const SignInView = () => {
   const dispatch = useDispatch();
   const router = useRouter();
+  const registered_users = useSelector(selectRegistered);
 
+  console.log("Registered users: ", registered_users);
   const [credentials, setCredentials] = useState<Credentials>({
     username: "",
     password: "",
@@ -80,9 +91,16 @@ const SignInView = () => {
     });
   };
 
-  const doLogin = () => {
-    console.log("doLogin: ", credentials);
+  const doLogin = (matchedUser: User) => {
+    console.log("doLogin: ", matchedUser);
     dispatch(login(credentials));
+
+    const updatedAuthUser = {
+      ...matchedUser,
+      lastLogin: new Date().toISOString(),
+    };
+
+    dispatch(updateUser(updatedAuthUser));
   };
 
   const handleSubmit = (e: any) => {
@@ -101,23 +119,49 @@ const SignInView = () => {
       return;
     }
 
+    const matchedUser = registered_users.find(
+      (user) =>
+        user.email === credentials.username &&
+        user.password === credentials.password
+    );
+
+    if (!matchedUser) {
+      console.log("User/Password incorrect");
+      setErrors({
+        ...errors,
+        credentials: "Usuario o contraseña incorrectos",
+      });
+      return;
+    }
+
+    if (!matchedUser.isEnabled) {
+      console.log("User is not enabled");
+      setErrors({
+        ...errors,
+        credentials: "Usuario no habilitado",
+      });
+      return;
+    }
+
     // TODO TEST THIS
-    doLogin();
+    doLogin(matchedUser);
   };
 
   const authenticated = useSelector(selectUser);
 
   useEffect(() => {
+    console.log("authenticated: ", authenticated);
+
     if (authenticated) {
       if (authenticated.role === USER_ROLES.ADMIN) {
         router.push("/vehicles");
       }
-     
-      if(authenticated.role === USER_ROLES.PERSONNEL){
+
+      if (authenticated.role === USER_ROLES.PERSONNEL) {
         router.push("/vehicles");
       }
     }
-  }, []);
+  }, [authenticated]);
 
   return (
     <div className="flex items-center justify-center py-4 md:py-2 px-0 md:px-2">
@@ -160,6 +204,11 @@ const SignInView = () => {
                       onChange={handleOnChange}
                     />
                   </div>
+                  {errors.username && (
+                    <div className="mt-1 pl-1">
+                      <ErrorLabel message={errors.username} />{" "}
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-4">
@@ -181,6 +230,11 @@ const SignInView = () => {
                       onChange={handleOnChange}
                     />
                   </div>
+                  {errors.password && (
+                    <div className="mt-1 pl-1">
+                      <ErrorLabel message={errors.password} />
+                    </div>
+                  )}
                 </div>
 
                 {/* <div className="flex items-center justify-between">
@@ -218,6 +272,12 @@ const SignInView = () => {
                     Ingresar
                   </button>
                 </div>
+
+                {errors.credentials && (
+                  <div className="mt-1 pl-1 text-center">
+                    <ErrorLabel message={errors.credentials} />
+                  </div>
+                )}
               </form>
               <div className="mt-4">
                 {/* <div className="relative">

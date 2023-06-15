@@ -1,7 +1,22 @@
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { USER_ROLES, logout, selectUser } from "../../features/auth/authSlice";
+import { getUserRole } from "../../features/auth/tools";
+import ProtectedItem from "./protected-item";
+export interface ProtectedGuardContent {
+  whitelist?: string[];
+}
+
+export interface NavbarContentItem {
+  path: string;
+  label: string;
+  visibleTo: string[];
+  isAuthElement?: boolean;
+}
 
 function NavBar() {
+  const dispatch = useDispatch();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState("");
 
@@ -10,7 +25,14 @@ function NavBar() {
   };
 
   const isActive = (item: any) => {
-    return selectedItem === item
+    const isSelected =
+      selectedItem === item ||
+      window.location.pathname.toLowerCase() === item.toLowerCase() ||
+      (item.toLowerCase() === "/vehicles" && window.location.pathname === "/");
+
+    console.log("Is selected item: ", isSelected);
+
+    return isSelected
       ? "text-white md:text-blue-700 bg-blue-700 md:bg-transparent"
       : "text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700";
   };
@@ -18,6 +40,58 @@ function NavBar() {
   const toggleNavbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+
+  const authenticated = useSelector(selectUser);
+
+  const userRole = authenticated?.role;
+  const isLoggedIn = userRole !== null && userRole !== undefined;
+
+  const shouldDisplayProtectedContent = (
+    props?: ProtectedGuardContent
+  ): boolean => {
+    const criteria = props?.whitelist || [
+      USER_ROLES.PERSONNEL,
+      USER_ROLES.ADMIN,
+    ];
+    return isLoggedIn && criteria.includes(userRole);
+  };
+
+  useEffect(() => {
+    console.log("user role: ", userRole);
+    console.log("isLoggedIn: ", isLoggedIn);
+  }, [isLoggedIn, authenticated, userRole]);
+
+  let menuItems: NavbarContentItem[] = [
+    {
+      label: "Vehículos",
+      path: "/vehicles",
+      visibleTo: [USER_ROLES.PERSONNEL, USER_ROLES.ADMIN],
+    },
+    {
+      label: "Clientes",
+      path: "/customers",
+      visibleTo: [USER_ROLES.ADMIN],
+    },
+    {
+      label: "Órdenes",
+      path: "/orders",
+      visibleTo: [USER_ROLES.ADMIN],
+    },
+    {
+      label: "Mis órdenes",
+      path: "/orders",
+      visibleTo: [USER_ROLES.PERSONNEL],
+    },
+    {
+      label: "Personal",
+      path: "/personnel",
+      visibleTo: [USER_ROLES.ADMIN],
+    },
+  ];
 
   return (
     <nav className="bg-white border-gray-200">
@@ -62,52 +136,93 @@ function NavBar() {
           } w-full md:block md:w-auto`}
         >
           <ul className="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white">
-            <li>
-              <Link
-                href="/vehicles"
-                className={`block py-2 pl-3 pr-4 rounded ${isActive(
-                  "Vehicles"
-                )} md:p-0`}
-                onClick={() => handleItemClick("Vehicles")}
-              >
-                Vehículos
-              </Link>
-            </li>
+            {menuItems.map((item) => {
+              return (
+                <ProtectedItem whiteList={item.visibleTo}>
+                  <li key={item.label}>
+                    <Link
+                      href={item.path}
+                      className={`block py-2 pl-3 pr-4 rounded ${isActive(
+                        item.path
+                      )} md:p-0`}
+                      onClick={() => handleItemClick(item.path)}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                </ProtectedItem>
+              );
+            })}
 
-            <li>
-              <Link
-                href="/customers"
-                className={`block py-2 pl-3 pr-4 rounded ${isActive(
-                  "Customers"
-                )} md:p-0`}
-                onClick={() => handleItemClick("Customers")}
-              >
-                Clientes
-              </Link>
-            </li>
+            {/* {shouldDisplayProtectedContent() && (
+              <li>
+                <Link
+                  href="/vehicles"
+                  className={`block py-2 pl-3 pr-4 rounded ${isActive(
+                    "Vehicles"
+                  )} md:p-0`}
+                  onClick={() => handleItemClick("Vehicles")}
+                >
+                  Vehículos
+                </Link>
+              </li>
+            )} */}
 
-            <li>
-              <Link
-                href="/orders"
-                className={`block py-2 pl-3 pr-4 rounded ${isActive(
-                  "Orders"
-                )} md:p-0`}
-                onClick={() => handleItemClick("Orders")}
-              >
-                Órdenes
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/personnel"
-                className={`block py-2 pl-3 pr-4 rounded ${isActive(
-                  "Personnel"
-                )} md:p-0`}
-                onClick={() => handleItemClick("Personnel")}
-              >
-                Personal
-              </Link>
-            </li>
+            {/* {shouldDisplayProtectedContent({
+              whitelist: [USER_ROLES.ADMIN],
+            }) && (
+              <li>
+                <Link
+                  href="/customers"
+                  className={`block py-2 pl-3 pr-4 rounded ${isActive(
+                    "Customers"
+                  )} md:p-0`}
+                  onClick={() => handleItemClick("Customers")}
+                >
+                  Clientes
+                </Link>
+              </li>
+            )} */}
+            {/* 
+            {shouldDisplayProtectedContent() && (
+              <li>
+                <Link
+                  href="/orders"
+                  className={`block py-2 pl-3 pr-4 rounded ${isActive(
+                    "Orders"
+                  )} md:p-0`}
+                  onClick={() => handleItemClick("Orders")}
+                >
+                  Órdenes
+                </Link>
+              </li>
+            )} */}
+            {/* {shouldDisplayProtectedContent({
+              whitelist: [USER_ROLES.ADMIN],
+            }) && (
+              <li>
+                <Link
+                  href="/personnel"
+                  className={`block py-2 pl-3 pr-4 rounded ${isActive(
+                    "Personnel"
+                  )} md:p-0`}
+                  onClick={() => handleItemClick("Personnel")}
+                >
+                  Personal
+                </Link>
+              </li>
+            )} */}
+            {isLoggedIn && (
+              <li>
+                <Link
+                  href="/signin"
+                  className={`block py-2 pl-3 pr-4 rounded text-rose-500 hover:text-rose-700 md:p-0`}
+                  onClick={() => handleLogout()}
+                >
+                  Cerrar sesión
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>

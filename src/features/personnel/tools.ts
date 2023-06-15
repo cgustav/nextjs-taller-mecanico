@@ -3,6 +3,28 @@ import { EmailUtils } from "../../utils/email.utils";
 import { RUTUtils } from "../../utils/rut.utils";
 
 export abstract class PersonnelTools {
+  public static validateCredentials(data: any): any {
+    let validationErrors: any = {};
+
+    if (data.password) {
+      if (data.password.trim().length < 6) {
+        validationErrors.password =
+          "Contraseña debe tener al menos 6 caracteres";
+      }
+    } else {
+      validationErrors.password = "Contraseña es requerida";
+    }
+
+    if (data.confirmPassword) {
+      if (data.confirmPassword !== data?.password) {
+        validationErrors.confirmPassword = "Las contraseñas no coinciden";
+      }
+    } else {
+      validationErrors.confirmPassword = "Confirmar contraseña es requerida";
+    }
+
+    return validationErrors;
+  }
   public static validatePersonnelData(data: any): any {
     let validationErrors: any = {};
 
