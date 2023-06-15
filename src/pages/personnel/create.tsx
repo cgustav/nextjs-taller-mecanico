@@ -280,10 +280,28 @@ function CreatePersonnel() {
         })
       : {};
 
+    let extraErrors = {};
+    if (!isEditing) {
+      if (name === "email") {
+        findElementByEmail(baseAuthUsers, value as string)
+          ? (extraErrors = { email: "El correo ya se encuentra registrado" })
+          : (extraErrors = {});
+      }
+    } else {
+      if (name === "email") {
+        if (authUser.email !== personnel.email) {
+          findElementByEmail(baseAuthUsers, value as string)
+            ? (extraErrors = { email: "El correo ya se encuentra registrado" })
+            : (extraErrors = {});
+        }
+      }
+    }
+
     const validationErrors = Object.assign(
       {},
       personnelErrors,
-      credentialsErrors
+      credentialsErrors,
+      extraErrors
     );
 
     if (validationErrors[name]) {
@@ -361,10 +379,25 @@ function CreatePersonnel() {
       ? PersonnelTools.validateCredentials(credentials)
       : {};
 
+    let extraErrors = {};
+
+    if (!isEditing) {
+      findElementByEmail(baseAuthUsers, personnel.email as string)
+        ? (extraErrors = { email: "El correo ya se encuentra registrado" })
+        : (extraErrors = {});
+    } else {
+      if (authUser.email !== personnel.email) {
+        findElementByEmail(baseAuthUsers, personnel.email as string)
+          ? (extraErrors = { email: "El correo ya se encuentra registrado" })
+          : (extraErrors = {});
+      }
+    }
+
     const validationErrors = Object.assign(
       {},
       personnelErrors,
-      credentialsErrors
+      credentialsErrors,
+      extraErrors
     );
 
     if (Object.keys(validationErrors).length) {

@@ -26,6 +26,7 @@ const separatorStyle = {
 function Vehicles() {
   const dispatch = useAppDispatch();
   const vehicles = useAppSelector(selectVehicles);
+  // const vehicles: any[] = [];
 
   /**
    * Hook para actualizar el estado para mostrar el mensaje de alerta
@@ -112,11 +113,11 @@ function Vehicles() {
 
           {vehicles.length === 0 && (
             <div className="flex flex-col items-center justify-center">
-              <div className="text-4xl text-gray-500 font-bold">
-                No hay vehículos registrados
+              <div className="text-center text-4xl text-gray-500 font-bold mt-6">
+                No hay vehículos encontrados
               </div>
-              <div className="text-2xl text-gray-500 font-bold">
-                Crea un vehículo para comenzar
+              <div className="text-center text-2xl text-gray-600 mt-4">
+                Registre un vehículo para comenzar
               </div>
             </div>
           )}

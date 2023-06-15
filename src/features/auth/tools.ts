@@ -31,6 +31,16 @@ export const getUserRole = () => {
   return null; // Si no hay usuario, retornar null o algún valor que indique que el rol no está definido
 };
 
+export const getUser = () => {
+  const globalState = localStorage.getItem("persist:nextjs");
+
+  console.log("Global state: ", globalState);
+
+  if (!globalState) return null;
+
+  return JSON.parse(JSON.parse(globalState).auth).authenticated;
+};
+
 // export const getUser = () => {
 // Obtener el usuario desde el estado global
 //   const user = useSelector(selectUser);

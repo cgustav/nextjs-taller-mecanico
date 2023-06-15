@@ -47,6 +47,26 @@ function Personnel() {
     setCurrentPage((prevPage) => prevPage + 1);
   };
 
+  // Resolver el nombre de la clase CSS para el estado del personal
+  const resolveStatusClassName = (isActive: boolean) => {
+    // switch (status) {
+    //   case WorkOrderStatus.IN_PROGRESS:
+    //     return "px-6 py-4 border-b border-gray-200 text-blue-500";
+    //   case WorkOrderStatus.PENDING:
+    //     return "px-6 py-4 border-b border-gray-200 text-yellow-500";
+    //   case WorkOrderStatus.BILLED:
+    //     return "px-6 py-4 border-b border-gray-200 text-green-500";
+    //   case WorkOrderStatus.CANCELLED:
+    //     return "px-6 py-4 border-b border-gray-200 text-red-500";
+    //   default:
+    //     return "px-6 py-4 border-b border-gray-200";
+    // }
+
+    return `px-6 py-4 border-b border-gray-200 ${
+      isActive ? "text-green-500" : "text-red-500"
+    }`;
+  };
+
   const router = useRouter();
 
   useEffect(
@@ -153,7 +173,7 @@ function Personnel() {
                   {item.specialty}
                 </td>
 
-                <td className="px-6 py-4 border-b border-gray-200">
+                <td className={resolveStatusClassName(item.isActive)}>
                   {/* {numeral(item.cost).format("$0,0")} */}
                   {/* {"Chuink"} */}
                   {item.isActive ? "Activo" : "Inactivo"}
